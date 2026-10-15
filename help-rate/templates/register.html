@@ -5,9 +5,10 @@
     <title>新規ユーザー登録 - おらほの助っ人けっぱれーと</title>
 </head>
 <body>
+    <p><a href="{{ url_for('index') }}" style="text-decoration: none; font-size: 16px;">🏠 ホーム画面に戻る</a></p>
+
     <h1>新規ユーザー登録</h1>
-    
-    <!-- フラッシュメッセージの表示 -->
+
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         <ul>
@@ -20,6 +21,7 @@
 
     <form method="POST">
         {{ form.hidden_tag() }}
+        
         <p>
             {{ form.username.label }}<br>
             {{ form.username(size=30) }}
@@ -36,9 +38,32 @@
             {{ form.confirm_password.label }}<br>
             {{ form.confirm_password(size=30) }}
         </p>
-        <p>{{ form.submit() }}</p>
+        
+        <!-- ボタン選択式（ラジオボタン）の年代 -->
+        <p>
+            <strong>{{ form.age_group.label }}</strong><br>
+            {% for subfield in form.age_group %}
+                <label style="margin-right: 15px; cursor: pointer;">
+                    {{ subfield }} {{ subfield.label.text }}
+                </label>
+            {% endfor %}
+        </p>
+
+        <!-- ボタン選択式（ラジオボタン）の性別 -->
+        <p>
+            <strong>{{ form.gender.label }}</strong><br>
+            {% for subfield in form.gender %}
+                <label style="margin-right: 15px; cursor: pointer;">
+                    {{ subfield }} {{ subfield.label.text }}
+                </label>
+            {% endfor %}
+        </p>
+
+        <p style="margin-top: 20px;">
+            {{ form.submit(value="登録する") }}
+        </p>
     </form>
+    
     <p><a href="{{ url_for('login') }}">すでにアカウントをお持ちの方はこちら（ログイン）</a></p>
-    <p><a href="{{ url_for('index') }}">トップへ戻る</a></p>
 </body>
 </html>

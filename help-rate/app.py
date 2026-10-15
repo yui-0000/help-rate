@@ -38,7 +38,6 @@ def teardown_request(exc):
 
 @app.route("/")
 def index():
-    """トップページ（案件一覧を表示）"""
     posts = Post.select().order_by(Post.created_at.desc())
     return render_template("index.html", posts=posts)
 
@@ -59,7 +58,16 @@ def register():
             flash("このメールアドレスは既に登録されています。", "danger")
             return render_template("register.html", form=form)
 
-        user = User(username=form.username.data, email=form.email.data)
+        # 「未選択・非公開」の場合は None として保存
+        selected_age = form.age_group.data
+        selected_gender = form.gender.data
+
+        user = User(
+            username=form.username.data,
+            email=form.email.data,
+            age_group=selected_age if selected_age and selected_age != "未選択・非公開" else None,
+            gender=selected_gender if selected_gender and selected_gender != "未選択・非公開" else None,
+        )
         user.set_password(form.password.data)
         user.save()
 
@@ -101,7 +109,6 @@ def logout():
 @app.route("/post", methods=["GET", "POST"])
 @login_required
 def create_post():
-    """お手伝い案件の投稿処理"""
     form = PostForm()
     if form.validate_on_submit():
         image_filename = None
@@ -121,6 +128,7 @@ def create_post():
             desired_date=form.desired_date.data,
             location=form.location.data,
             reward=form.reward.data,
+            recommendation=form.recommendation.data,
             image_path=image_filename,
             author=current_user,
         )
@@ -132,7 +140,6 @@ def create_post():
 
 @app.route("/post/<int:post_id>")
 def post_detail(post_id):
-    """お手伝い案件の詳細ページ"""
     try:
         post = Post.get_by_id(post_id)
         return render_template("detail.html", post=post)
@@ -141,26 +148,74 @@ def post_detail(post_id):
         return redirect(url_for("index"))
 
 
+@app.route("/apply/<int:post_id>", methods=["GET", "POST"])
+@login_required
+def apply_post(post_id):
+    try:
+        post = Post.get_by_id(post_id)
+        if post.author == current_user:
+            flash("ご自身の投稿には応募できません。", "warning")
+            return redirect(url_for("post_detail", post_id=post.id))
+
+        if post.helper:
+            flash("この案件はすでに他の助っ人が決定しています。", "info")
+            return redirect(url_for("post_detail", post_id=post.id))
+
+        if request.method == "POST":
+            message = request.form.get("helper_message")
+            post.helper = current_user
+            post.helper_message = message if message else "よろしくお願いします！"
+            post.save()
+            flash("このお手伝いへの応募が完了しました！依頼者からの連絡をお待ちください。", "success")
+            return redirect(url_for("post_detail", post_id=post.id))
+
+        return render_template("apply_confirm.html", post=post)
+
+    except Post.DoesNotExist:
+        flash("該当する案件が見つかりませんでした。", "danger")
+        return redirect(url_for("index"))
+
+
+@app.route("/cancel_confirm/<int:post_id>", methods=["GET", "POST"])
+@login_required
+def cancel_confirm(post_id):
+    try:
+        post = Post.get_by_id(post_id)
+        if post.helper != current_user:
+            flash("取り消し権限がありません。", "danger")
+            return redirect(url_for("post_detail", post_id=post.id))
+
+        if request.method == "POST":
+            post.helper = None
+            post.helper_message = None
+            post.save()
+            flash("お手伝いの応募を取り消しました。", "info")
+            return redirect(url_for("post_detail", post_id=post.id))
+
+        return render_template("cancel_confirm.html", post=post)
+
+    except Post.DoesNotExist:
+        flash("該当する案件が見つかりませんでした。", "danger")
+        return redirect(url_for("index"))
+
+
 @app.route("/edit/<int:post_id>", methods=["GET", "POST"])
 @login_required
 def edit_post(post_id):
-    """お手伝い案件の編集（訂正）処理"""
     try:
         post = Post.get_by_id(post_id)
-
-        # 投稿者本人かどうかをチェック
         if post.author != current_user:
             flash("他のユーザーの投稿は編集できません。", "danger")
             return redirect(url_for("index"))
 
         form = PostForm(obj=post)
-
         if form.validate_on_submit():
             post.title = form.title.data
             post.content = form.content.data
             post.desired_date = form.desired_date.data
             post.location = form.location.data
             post.reward = form.reward.data
+            post.recommendation = form.recommendation.data
 
             image_file = form.image.data
             if image_file and image_file.filename:
@@ -176,7 +231,6 @@ def edit_post(post_id):
             return redirect(url_for("post_detail", post_id=post.id))
 
         return render_template("edit.html", form=form, post=post)
-
     except Post.DoesNotExist:
         flash("該当する案件が見つかりませんでした。", "danger")
         return redirect(url_for("index"))
@@ -185,11 +239,10 @@ def edit_post(post_id):
 @app.route("/delete/<int:post_id>", methods=["GET", "POST"])
 @login_required
 def delete_post(post_id):
-    """お手伝い案件の削除処理"""
     try:
         post = Post.get_by_id(post_id)
         if post.author != current_user:
-            flash("他のユーザーの投稿は削除できません。", "danger")
+            flash("他のユーザーの投稿は編集できません。", "danger")
             return redirect(url_for("index"))
 
         if request.method == "POST":
@@ -203,7 +256,6 @@ def delete_post(post_id):
             return redirect(url_for("index"))
 
         return render_template("delete_confirm.html", post=post)
-
     except Post.DoesNotExist:
         flash("該当する案件が見つかりませんでした。", "danger")
         return redirect(url_for("index"))

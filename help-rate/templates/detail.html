@@ -9,12 +9,23 @@
 <body>
     <p><a href="{{ url_for('index') }}" style="text-decoration: none; font-size: 16px;">🏠 ホーム画面に戻る</a></p>
 
+    <!-- フラッシュメッセージ -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <ul>
+        {% for category, message in messages %}
+        <li>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+
     <div style="border: 1px solid #ccc; padding: 20px; width: 60%; background-color: #fafafa;">
         <h2>{{ post.title }}</h2>
 
         <table style="width: 100%; margin-bottom: 15px; border-collapse: collapse;">
             <tr>
-                <td style="padding: 8px; font-weight: bold; width: 140px; background-color: #eee; border: 1px solid #ddd;">実施希望日時</td>
+                <td style="padding: 8px; font-weight: bold; width: 160px; background-color: #eee; border: 1px solid #ddd;">実施希望日時</td>
                 <td style="padding: 8px; border: 1px solid #ddd;">{{ post.desired_date or '未設定' }}</td>
             </tr>
             <tr>
@@ -22,8 +33,25 @@
                 <td style="padding: 8px; border: 1px solid #ddd;">{{ post.location or '未設定' }}</td>
             </tr>
             <tr>
-                <td style="padding: 8px; font-weight: bold; background-color: #eee; border: 1px solid #ddd;">謝礼・金品</td>
+                <td style="padding: 8px; font-weight: bold; background-color: #eee; border: 1px solid #ddd;">謝礼</td>
                 <td style="padding: 8px; border: 1px solid #ddd;">{{ post.reward or '未設定' }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; font-weight: bold; background-color: #eee; border: 1px solid #ddd;">推奨する助っ人像</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">{{ post.recommendation or '指定なし（どなたでも歓迎）' }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; font-weight: bold; background-color: #eee; border: 1px solid #ddd;">現在の状況</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">
+                    {% if post.helper %}
+                    <span style="color: green; font-weight: bold;">🤝 助っ人決定！（{{ post.helper.username }}さん）</span>
+                    {% if post.helper_message %}
+                    <br><small style="color: #555;">ひと言: 「{{ post.helper_message }}」</small>
+                    {% endif %}
+                    {% else %}
+                    <span style="color: #0066cc;">募集中</span>
+                    {% endif %}
+                </td>
             </tr>
         </table>
 
@@ -40,12 +68,28 @@
 
         <p><small>投稿者: {{ post.author.username }} | 投稿日時: {{ post.created_at.strftime('%Y-%m-%d %H:%M') }}</small></p>
 
-        <!-- 本人の場合は詳細画面から編集・削除が可能 -->
-        {% if current_user.is_authenticated and post.author == current_user %}
+        <!-- ログインユーザーに応じたボタン表示 -->
+        {% if current_user.is_authenticated %}
+        {% if post.author == current_user %}
         <p>
             <a href="{{ url_for('edit_post', post_id=post.id) }}" style="background-color: #4CAF50; color: white; text-decoration: none; padding: 5px 10px; border-radius: 4px; font-size: 14px; margin-right: 10px;">✏️ この案件を編集する</a>
             <a href="{{ url_for('delete_post', post_id=post.id) }}" style="background-color: #ff4d4d; color: white; text-decoration: none; padding: 5px 10px; border-radius: 4px; font-size: 14px;">🗑️ この案件を削除する</a>
         </p>
+        {% else %}
+        {% if post.helper == current_user %}
+        <!-- 自分がすでに応募している場合：取り消し確認画面へのリンク -->
+        <p>
+            <a href="{{ url_for('cancel_confirm', post_id=post.id) }}" style="background-color: #cc0000; color: white; text-decoration: none; padding: 10px 20px; border-radius: 4px; font-size: 16px; font-weight: bold; display: inline-block;">⚠️ この応募を取り消す</a>
+        </p>
+        {% elif not post.helper %}
+        <!-- 募集中：「手伝う！」確認画面へのリンク -->
+        <p>
+            <a href="{{ url_for('apply_post', post_id=post.id) }}" style="background-color: #ff8c00; color: white; text-decoration: none; padding: 10px 20px; font-size: 16px; border-radius: 4px; font-weight: bold; display: inline-block;">🙋 このお手伝いを手伝う！</a>
+        </p>
+        {% endif %}
+        {% endif %}
+        {% else %}
+        <p><a href="{{ url_for('login') }}">ログイン</a>すると、このお手伝いに応募できます。</p>
         {% endif %}
     </div>
 </body>
