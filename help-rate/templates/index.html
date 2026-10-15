@@ -51,6 +51,11 @@
                     {% endif %}
                     
                     <small>投稿者: {{ post.author.username }} | 投稿日時: {{ post.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+
+                    <!-- 本人の場合のみ表示される削除ボタン（確認画面へ移動） -->
+                    {% if current_user.is_authenticated and post.author == current_user %}
+                        <a href="{{ url_for('delete_post', post_id=post.id) }}" style="display:inline-block; margin-left: 10px; background-color: #ff4d4d; color: white; text-decoration: none; padding: 3px 8px; border-radius: 4px; font-size: 12px;">🗑️ 削除</a>
+                    {% endif %}
                 </li>
             {% endfor %}
         </ul>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>削除の確認 - おらほの助っ人けっぱれーと</title>
+</head>
+<body>
+    <h1>削除の確認</h1>
+    <p>本当に以下の案件を削除してもよろしいですか？この操作は取り消せません。</p>
+
+    <div style="border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; width: 50%;">
+        <h3>{{ post.title }}</h3>
+        <p>{{ post.content }}</p>
+        {% if post.image_path %}
+            <p><img src="{{ url_for('uploaded_file', filename=post.image_path) }}" alt="現場写真" width="200"></p>
+        {% endif %}
+        <small>投稿日時: {{ post.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+    </div>
+
+    <!-- 削除を実行するボタン -->
+    <form action="{{ url_for('delete_post', post_id=post.id) }}" method="POST" style="display:inline;">
+        <button type="submit" style="background-color: #ff4d4d; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold;">はい、削除します</button>
+    </form>
+
+    <!-- キャンセルして一覧に戻るリンク -->
+    <a href="{{ url_for('index') }}" style="margin-left: 15px; text-decoration: none; padding: 8px 15px; background-color: #ccc; color: black; border-radius: 4px;">いいえ、戻ります</a>
+</body>
+</html>
