@@ -6,15 +6,12 @@ from dotenv import load_dotenv
 from models import db, User, Post
 from forms import RegisterForm, LoginForm, PostForm
 
-# .envファイルから環境変数を読み込む
 load_dotenv()
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "default-secret-key")
-# 画像アップロード先のフォルダ設定
 app.config["UPLOAD_FOLDER"] = "uploads"
 
-# Flask-Loginの設定
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
@@ -48,7 +45,6 @@ def index():
 
 @app.route("/uploads/<filename>")
 def uploaded_file(filename):
-    """アップロードされた画像をブラウザに配信するルート"""
     return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
 
 
@@ -120,7 +116,13 @@ def create_post():
             image_filename = filename
 
         Post.create(
-            title=form.title.data, content=form.content.data, image_path=image_filename, author=current_user
+            title=form.title.data,
+            content=form.content.data,
+            desired_date=form.desired_date.data,
+            location=form.location.data,
+            reward=form.reward.data,
+            image_path=image_filename,
+            author=current_user,
         )
         flash("新しいお手伝い案件を投稿しました！", "success")
         return redirect(url_for("index"))
@@ -128,19 +130,68 @@ def create_post():
     return render_template("post.html", form=form)
 
 
-@app.route("/delete/<int:post_id>", methods=["GET", "POST"])
+@app.route("/post/<int:post_id>")
+def post_detail(post_id):
+    """お手伝い案件の詳細ページ"""
+    try:
+        post = Post.get_by_id(post_id)
+        return render_template("detail.html", post=post)
+    except Post.DoesNotExist:
+        flash("該当する案件が見つかりませんでした。", "danger")
+        return redirect(url_for("index"))
+
+
+@app.route("/edit/<int:post_id>", methods=["GET", "POST"])
 @login_required
-def delete_post(post_id):
-    """お手伝い案件の削除処理（確認画面表示 ＆ 削除実行）"""
+def edit_post(post_id):
+    """お手伝い案件の編集（訂正）処理"""
     try:
         post = Post.get_by_id(post_id)
 
         # 投稿者本人かどうかをチェック
         if post.author != current_user:
+            flash("他のユーザーの投稿は編集できません。", "danger")
+            return redirect(url_for("index"))
+
+        form = PostForm(obj=post)
+
+        if form.validate_on_submit():
+            post.title = form.title.data
+            post.content = form.content.data
+            post.desired_date = form.desired_date.data
+            post.location = form.location.data
+            post.reward = form.reward.data
+
+            image_file = form.image.data
+            if image_file and image_file.filename:
+                filename = secure_filename(image_file.filename)
+                filename = filename.replace(" ", "_")
+                os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+                file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+                image_file.save(file_path)
+                post.image_path = filename
+
+            post.save()
+            flash("案件の内容を更新しました！", "success")
+            return redirect(url_for("post_detail", post_id=post.id))
+
+        return render_template("edit.html", form=form, post=post)
+
+    except Post.DoesNotExist:
+        flash("該当する案件が見つかりませんでした。", "danger")
+        return redirect(url_for("index"))
+
+
+@app.route("/delete/<int:post_id>", methods=["GET", "POST"])
+@login_required
+def delete_post(post_id):
+    """お手伝い案件の削除処理"""
+    try:
+        post = Post.get_by_id(post_id)
+        if post.author != current_user:
             flash("他のユーザーの投稿は削除できません。", "danger")
             return redirect(url_for("index"))
 
-        # POSTリクエスト（確認画面で「本当に削除する」が押されたとき）
         if request.method == "POST":
             if post.image_path:
                 image_path = os.path.join(app.config["UPLOAD_FOLDER"], post.image_path)
@@ -151,7 +202,6 @@ def delete_post(post_id):
             flash("案件を削除しました。", "success")
             return redirect(url_for("index"))
 
-        # GETリクエスト（削除確認画面を表示する）
         return render_template("delete_confirm.html", post=post)
 
     except Post.DoesNotExist:

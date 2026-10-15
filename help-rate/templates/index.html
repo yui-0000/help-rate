@@ -5,7 +5,8 @@
     <title>おらほの助っ人けっぱれーと</title>
 </head>
 <body>
-    <h1>おらほの助っ人けっぱれーと</h1>
+    <!-- タイトルクリックでホームに戻る -->
+    <h1><a href="{{ url_for('index') }}" style="text-decoration: none; color: inherit;">🏠 おらほの助っ人けっぱれーと</a></h1>
     <p>地域密着型のお手伝いマッチングアプリへようこそ！</p>
 
     <!-- フラッシュメッセージ -->
@@ -25,11 +26,13 @@
     {% if current_user.is_authenticated %}
         <p>ようこそ、<strong>{{ current_user.username }}</strong> さん！</p>
         <p>
+            <a href="{{ url_for('index') }}">🏠 ホームに戻る</a> | 
             <a href="{{ url_for('create_post') }}">✏️ 新しいお手伝いを投稿する</a> | 
             <a href="{{ url_for('logout') }}">ログアウトする</a>
         </p>
     {% else %}
         <p>
+            <a href="{{ url_for('index') }}">🏠 ホームに戻る</a> | 
             <a href="{{ url_for('login') }}">ログイン</a> | 
             <a href="{{ url_for('register') }}">新規ユーザー登録</a>
         </p>
@@ -42,7 +45,8 @@
         <ul>
             {% for post in posts %}
                 <li style="margin-bottom: 20px; border: 1px solid #ccc; padding: 10px;">
-                    <h3>{{ post.title }}</h3>
+                    <!-- タイトルをクリックすると詳細ページへ飛ぶ -->
+                    <h3><a href="{{ url_for('post_detail', post_id=post.id) }}" style="text-decoration: none; color: #0066cc;">{{ post.title }}</a></h3>
                     <p>{{ post.content }}</p>
                     
                     <!-- 画像表示部分 -->

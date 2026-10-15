@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <title>案件の編集 - おらほの助っ人けっぱれーと</title>
+</head>
+
+<body>
+    <p>
+        <a href="{{ url_for('post_detail', post_id=post.id) }}" style="text-decoration: none; font-size: 16px;">⬅️ 詳細画面に戻る</a> |
+        <a href="{{ url_for('index') }}" style="text-decoration: none; font-size: 16px;">🏠 ホーム画面に戻る</a>
+    </p>
+
+    <h1>案件内容の編集（訂正）</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <ul>
+        {% for category, message in messages %}
+        <li>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+
+    <form method="POST" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+
+        <p>
+            {{ form.title.label }}<br>
+            {{ form.title(size=40) }}
+        </p>
+        <p>
+            {{ form.content.label }}<br>
+            {{ form.content(rows=5, cols=40) }}
+        </p>
+        <p>
+            {{ form.desired_date.label }}<br>
+            {{ form.desired_date(size=40) }}
+        </p>
+        <p>
+            {{ form.location.label }}<br>
+            {{ form.location(size=40) }}
+        </p>
+        <p>
+            {{ form.reward.label }}<br>
+            {{ form.reward(size=40) }}
+        </p>
+        <p>
+            {{ form.image.label }}（※変更する場合のみ選択）<br>
+            {{ form.image() }}
+        </p>
+        <p>
+            {{ form.submit(value="更新する") }}
+        </p>
+    </form>
+</body>
+
+</html>
