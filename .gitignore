@@ -1,2 +1,15 @@
+# 仮想環境
 .venv/
-.env/
+
+# 環境変数
+.env
+
+# データベース
+*.db
+
+# Pythonキャッシュ
+__pycache__/
+*.py[cod]
+
+# Flaskインスタンス
+instance/
