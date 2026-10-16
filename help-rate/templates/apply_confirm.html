@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <title>応募の確認 - おらほの助っ人けっぱれーと</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/apply_confirm.css') }}">
 </head>
 <body>
-    <p><a href="{{ url_for('post_detail', post_id=post.id) }}" style="text-decoration: none; font-size: 16px;">⬅️ 案件詳細に戻る</a></p>
+    <p><a href="{{ url_for('post_detail', post_id=post.id) }}" class="back-link">⬅️ 案件詳細に戻る</a></p>
 
     <h1>お手伝い応募の確認</h1>
 
-    <div style="border: 1px solid #ccc; padding: 20px; width: 60%; background-color: #fafafa; margin-bottom: 20px;">
+    <div class="post-summary">
         <h3>{{ post.title }}</h3>
         <p><strong>実施希望日時:</strong> {{ post.desired_date or '未設定' }}</p>
         <p><strong>作業場所:</strong> {{ post.location or '未設定' }}</p>
@@ -22,12 +23,12 @@
             <textarea name="helper_message" rows="4" cols="50" placeholder="例：はじめまして！当日お手伝いに伺います。よろしくお願いします。"></textarea>
         </p>
 
-        <p style="font-weight: bold; color: #333; margin-top: 20px;">
-            上記の内容でお手伝いに応募（決定）しますか？
+        <p class="confirmation-text">
+            上記の内容でお手伝いに応募し、依頼者とチャットで相談しますか？住所・連絡先は、相談後に依頼者が助っ人を確定して公開するまで表示されません。
         </p>
 
-        <button type="submit" style="background-color: #4CAF50; color: white; border: none; padding: 10px 20px; font-size: 16px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-right: 10px;">✅ はい、応募する</button>
-        <a href="{{ url_for('post_detail', post_id=post.id) }}" style="background-color: #aaa; color: white; text-decoration: none; padding: 11px 20px; border-radius: 4px; font-size: 16px; font-weight: bold;">いいえ（戻る）</a>
+        <button type="submit" class="confirm-button">✅ はい、応募する</button>
+        <a href="{{ url_for('post_detail', post_id=post.id) }}" class="cancel-link">いいえ（戻る）</a>
     </form>
 </body>
 </html>

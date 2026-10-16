@@ -41,6 +41,8 @@ class Post(Model):
     author = ForeignKeyField(User, backref="posts")
     helper = ForeignKeyField(User, backref="helped_posts", null=True)
     helper_message = TextField(null=True)
+    contact_shared = BooleanField(default=False)
+    is_completed = BooleanField(default=False)
 
     class Meta:
         database = db
@@ -57,11 +59,16 @@ class Message(Model):
 
 
 def initialize():
-    db.connect()
-    db.create_tables([User, Post, Message], safe=True)
-    db.close()
+    with db.connection_context():
+        with db.atomic():
+            db.create_tables([User, Post, Message], safe=True)
+            columns = {column.name for column in db.get_columns("post")}
+            for name in ("contact_shared", "is_completed"):
+                if name not in columns:
+                    db.execute_sql(
+                        f'ALTER TABLE "post" ADD COLUMN "{name}" INTEGER NOT NULL DEFAULT 0'
+                    )
 
 
 if __name__ == "__main__":
-    db.connect()
-    db.create_tables([User, Post, Message], safe=True)
+    initialize()

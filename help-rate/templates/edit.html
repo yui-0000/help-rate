@@ -5,78 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>案件の編集 - おらほの助っ人けっぱれーと</title>
-    <style>
-        body {
-            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Meiryo", sans-serif;
-            background: linear-gradient(135deg, #fef9e7 0%, #edf7ed 100%);
-            background-attachment: fixed;
-            margin: 0;
-            padding: 20px;
-            color: #333;
-        }
-
-        .container {
-            max-width: 700px;
-            margin: 0 auto;
-        }
-
-        .back-link {
-            display: inline-block;
-            margin-bottom: 20px;
-            color: #2e7d32;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        .card {
-            background-color: #ffffff;
-            border-radius: 16px;
-            padding: 30px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
-        }
-
-        label {
-            font-weight: bold;
-            color: #444;
-            display: block;
-            margin-bottom: 6px;
-            font-size: 14px;
-        }
-
-        input[type="text"],
-        textarea {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 20px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            box-sizing: border-box;
-            font-size: 15px;
-            background-color: #fafafa;
-        }
-
-        input[type="file"] {
-            margin-bottom: 20px;
-        }
-
-        .btn-submit {
-            background-color: #2e7d32;
-            color: white;
-            padding: 14px 25px;
-            border: none;
-            border-radius: 30px;
-            font-weight: bold;
-            font-size: 16px;
-            cursor: pointer;
-            width: 100%;
-            box-shadow: 0 4px 10px rgba(46, 125, 50, 0.3);
-            transition: transform 0.1s;
-        }
-
-        .btn-submit:hover {
-            transform: translateY(-2px);
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/edit.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/area-map.css') }}">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous">
 </head>
 
 <body>
@@ -87,7 +18,7 @@
         </p>
 
         <div class="card">
-            <h2 style="margin-top: 0; color: #2e7d32; text-align: center; margin-bottom: 25px;">✏️ 案件内容の編集</h2>
+            <h2 class="page-title">✏️ 案件内容の編集</h2>
 
             <form method="POST" enctype="multipart/form-data">
                 {{ form.hidden_tag() }}
@@ -107,6 +38,19 @@
                 <div>
                     {{ form.location.label }}
                     {{ form.location() }}
+                    {% include '_area_map.html' %}
+                </div>
+                <div>
+                    {{ form.detail_address.label }}
+                    {{ form.detail_address(placeholder="例：平泉字衣関 123-4 / 連絡先: 090-XXXX-XXXX", minlength=10, maxlength=500, aria_describedby="detail-address-help detail-address-errors") }}
+                    <p id="detail-address-help" class="field-help">住所・連絡先を10〜500文字で具体的に入力してください。応募者には、チャットで相談した後に依頼者が承諾して公開するまで表示されません。すでに公開済みの場合は変更後の内容も同じ相手に表示されます。</p>
+                    <div id="detail-address-errors" class="field-error" role="alert">
+                        {% for error in form.detail_address.errors %}<p>{{ error }}</p>{% endfor %}
+                    </div>
+                </div>
+                <div>
+                    {{ form.contact_method.label }}
+                    {{ form.contact_method() }}
                 </div>
                 <div>
                     {{ form.reward.label }}
@@ -117,16 +61,18 @@
                     {{ form.recommendation() }}
                 </div>
                 <div>
-                    {{ form.image.label }} <span style="font-size: 12px; color: #888;">（※変更する場合のみ選択）</span>
+                    {{ form.image.label }} <span class="image-hint">（※変更する場合のみ選択）</span>
                     {{ form.image() }}
                 </div>
 
-                <div style="margin-top: 10px;">
+                <div class="submit-row">
                     <button type="submit" class="btn-submit">内容を更新する</button>
                 </div>
             </form>
         </div>
     </div>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous" defer></script>
+    <script src="{{ url_for('static', filename='js/area-map.js') }}" defer></script>
 </body>
 
 </html>

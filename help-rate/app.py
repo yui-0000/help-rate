@@ -1,12 +1,12 @@
 import os
-from flask import Flask, render_template, redirect, url_for, request, flash, send_from_directory
+from flask import Flask, render_template, redirect, url_for, request, flash, send_from_directory, abort
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
-from wtforms import StringField, PasswordField, TextAreaField, SubmitField, IntegerField, SelectField
-from wtforms.validators import DataRequired, Optional
+from wtforms import StringField, PasswordField, TextAreaField, SubmitField, IntegerField, SelectField, HiddenField
+from wtforms.validators import DataRequired, Length, Optional
 
 from models import User, Post, Message, initialize
 
@@ -18,6 +18,17 @@ os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
+
+
+@app.before_request
+def ensure_database_initialized():
+    if not app.config.get("_DATABASE_INITIALIZED"):
+        initialize()
+        app.config["_DATABASE_INITIALIZED"] = True
+
+
+class ContactApprovalForm(FlaskForm):
+    helper_id = HiddenField(validators=[DataRequired()])
 
 
 @login_manager.user_loader
@@ -74,6 +85,7 @@ class PostForm(FlaskForm):
     location = SelectField(
         "大まかな場所（地区名など）",
         choices=[
+            ("", "地域を選択してください"),
             ("平泉地区", "平泉地区"),
             ("衣川地区", "衣川地区"),
             ("中尊寺周辺", "中尊寺周辺"),
@@ -82,7 +94,14 @@ class PostForm(FlaskForm):
         ],
         validators=[DataRequired()],
     )
-    detail_address = StringField("詳細な住所・連絡先", validators=[DataRequired()])
+    detail_address = StringField(
+        "詳細な住所・連絡先",
+        filters=[lambda value: value.strip() if value else value],
+        validators=[
+            DataRequired(message="詳細な住所・連絡先を入力してください。"),
+            Length(min=10, max=500, message="詳細な住所・連絡先は10〜500文字で具体的に入力してください。"),
+        ],
+    )
     contact_method = SelectField(
         "連絡希望方法",
         choices=[
@@ -100,8 +119,30 @@ class PostForm(FlaskForm):
 
 @app.route("/")
 def index():
-    posts = Post.select().order_by(Post.created_at.desc())
-    return render_template("index.html", posts=posts)
+    posts, selected_status = filtered_posts()
+    return render_template("index.html", posts=posts, selected_status=selected_status)
+
+
+def filtered_posts():
+    selected_status = request.args.get("status", "all")
+    filters = {
+        "open": (Post.is_completed == False) & Post.helper.is_null(True),
+        "discussing": (Post.is_completed == False) & Post.helper.is_null(False) & (Post.contact_shared == False),
+        "active": (Post.is_completed == False) & Post.helper.is_null(False) & (Post.contact_shared == True),
+        "completed": Post.is_completed == True,
+    }
+    posts = Post.select()
+    if selected_status in filters:
+        posts = posts.where(filters[selected_status])
+    else:
+        selected_status = "all"
+    return posts.order_by(Post.is_completed.asc(), Post.created_at.desc(), Post.id.desc()), selected_status
+
+
+@app.route("/posts/list")
+def posts_list():
+    posts, selected_status = filtered_posts()
+    return render_template("_posts_list.html", posts=posts, selected_status=selected_status), 200, {"Cache-Control": "no-store"}
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -227,7 +268,51 @@ def post_detail(post_id):
     if is_authorized:
         messages = Message.select().where(Message.post == post).order_by(Message.created_at.asc())
 
-    return render_template("detail.html", post=post, messages=messages, is_authorized=is_authorized)
+    approval_form = ContactApprovalForm(helper_id=str(post.helper_id or ""))
+    return render_template(
+        "detail.html", post=post, messages=messages,
+        is_authorized=is_authorized, approval_form=approval_form,
+    )
+
+
+@app.route("/post/<int:post_id>/share-contact", methods=["POST"])
+@login_required
+def share_contact(post_id):
+    post = Post.get_by_id(post_id)
+    if post.author != current_user:
+        abort(403)
+    form = ContactApprovalForm()
+    if not form.validate_on_submit():
+        abort(400)
+    updated = (Post.update(contact_shared=True)
+               .where(Post.id == post_id, Post.author == current_user.id,
+                      Post.helper.is_null(False), Post.helper == form.helper_id.data,
+                      Post.is_completed == False)
+               .execute())
+    if not updated:
+        abort(409)
+    flash("助っ人を確定し、この相手に住所・連絡先を公開しました。")
+    return redirect(url_for("post_detail", post_id=post_id))
+
+
+@app.route("/post/<int:post_id>/complete", methods=["POST"])
+@login_required
+def complete_post(post_id):
+    post = Post.get_by_id(post_id)
+    if post.author != current_user:
+        abort(403)
+    form = ContactApprovalForm()
+    if not form.validate_on_submit():
+        abort(400)
+    updated = (Post.update(is_completed=True)
+               .where(Post.id == post_id, Post.author == current_user.id,
+                      Post.contact_shared == True, Post.is_completed == False,
+                      Post.helper.is_null(False), Post.helper == form.helper_id.data)
+               .execute())
+    if not updated:
+        abort(409)
+    flash("依頼を終了しました。助っ人の方にも終了済みと表示されます。")
+    return redirect(url_for("post_detail", post_id=post_id))
 
 
 @app.route("/post/<int:post_id>/message", methods=["POST"])
@@ -310,11 +395,14 @@ def delete_post(post_id):
 @login_required
 def apply_post(post_id):
     post = Post.get_by_id(post_id)
+    if post.is_completed:
+        flash("この依頼は終了しているため、応募できません。")
+        return redirect(url_for("post_detail", post_id=post.id))
     if post.author == current_user:
         flash("ご自身の案件には応募できません。")
         return redirect(url_for("post_detail", post_id=post.id))
     if post.helper:
-        flash("すでに助っ人が決定している案件です。")
+        flash("すでに応募者と相談中、または助っ人が決定している案件です。")
         return redirect(url_for("post_detail", post_id=post.id))
 
     (request.method == "POST")  # カッコのバランスを綺麗に整理
@@ -322,6 +410,7 @@ def apply_post(post_id):
         helper_message = request.form.get("helper_message")
         post.helper = current_user
         post.helper_message = helper_message
+        post.contact_shared = False
         post.save()
         flash("助っ人として応募が完了しました！")
         return redirect(url_for("post_detail", post_id=post.id))
@@ -337,6 +426,9 @@ def apply_post(post_id):
 @login_required
 def cancel_confirm(post_id):
     post = Post.get_by_id(post_id)
+    if post.is_completed:
+        flash("終了済みの依頼は、応募を取り消せません。")
+        return redirect(url_for("post_detail", post_id=post.id))
     if post.helper != current_user:
         flash("この応募を取り消す権限はありません。")
         return redirect(url_for("post_detail", post_id=post.id))
@@ -344,6 +436,7 @@ def cancel_confirm(post_id):
     if request.method == "POST":
         post.helper = None
         post.helper_message = None
+        post.contact_shared = False
         post.save()
         flash("応募を取り消しました。")
         return redirect(url_for("post_detail", post_id=post.id))

@@ -1,0 +1,40 @@
+body .back-link {
+    text-decoration: none;
+    font-size: 16px;
+}
+
+body .post-summary {
+    border: 1px solid #ccc;
+    padding: 20px;
+    width: 60%;
+    background-color: #fafafa;
+    margin-bottom: 20px;
+}
+
+body .confirmation-text {
+    font-weight: bold;
+    color: #333;
+    margin-top: 20px;
+}
+
+body .confirm-button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+body .cancel-link {
+    background-color: #aaa;
+    color: white;
+    text-decoration: none;
+    padding: 11px 20px;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: bold;
+}

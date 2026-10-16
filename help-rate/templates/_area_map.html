@@ -1,0 +1,11 @@
+<section id="area-map" class="area-map" aria-labelledby="area-map-title" data-location="{{ map_location|default('') }}" hidden>
+    <h3 id="area-map-title" aria-live="polite">選択した地域の地図</h3>
+    <p><span class="area-map-legend" aria-hidden="true"></span>赤い枠内が、選択した地域のおおよその範囲です。地区の正確な境界や、個人の住所は示していません。</p>
+    <div id="area-map-canvas" role="region" aria-label="選択した地域のおおよその地図"></div>
+    <p id="area-map-error" role="status" hidden>地図を読み込めません。「大きな地図で見る」から確認してください。</p>
+    <div class="area-map-footer">
+        <a id="area-map-full" target="_blank" rel="noopener noreferrer">大きな地図で見る（別タブ）</a>
+        <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap contributors</a>
+    </div>
+    <p>地図が表示されない場合は「大きな地図で見る」から確認できます。</p>
+</section>

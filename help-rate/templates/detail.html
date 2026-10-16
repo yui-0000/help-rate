@@ -5,287 +5,59 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ post.title }} - おらほの助っ人けっぱれーと</title>
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: linear-gradient(110deg, #fceecb 0%, #eef7e6 100%);
-            background-attachment: fixed;
-            margin: 0;
-            padding: 25px 15px;
-            color: #333;
-            font-size: 16px;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 650px;
-            margin: 0 auto;
-        }
-
-        .back-link {
-            display: inline-block;
-            margin-bottom: 20px;
-            color: #2e7d32;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 15px;
-        }
-
-        .card {
-            background-color: #ffffff;
-            border-radius: 16px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
-            margin-bottom: 25px;
-        }
-
-        h1 {
-            color: #2e7d32;
-            margin-top: 0;
-            font-size: 22px;
-        }
-
-        .meta-info {
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 15px;
-            line-height: 1.6;
-        }
-
-        .content-box {
-            font-size: 16px;
-            line-height: 1.6;
-            background: #fafafa;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-
-        /* チャットエリア全体 */
-        .chat-section {
-            background: #ffffff;
-            border-radius: 16px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
-            margin-bottom: 40px;
-        }
-
-        .chat-title {
-            font-size: 18px;
-            font-weight: bold;
-            color: #2e7d32;
-            margin-bottom: 15px;
-            border-bottom: 2px solid #e8f5e9;
-            padding-bottom: 8px;
-        }
-
-        .chat-logs {
-            max-height: 400px;
-            overflow-y: auto;
-            padding: 15px;
-            background: #f9f9f9;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            border: 1px solid #eee;
-        }
-
-        /* メッセージごとの行 */
-        .chat-message {
-            margin-bottom: 20px;
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-        }
-
-        .chat-header {
-            font-size: 12px;
-            margin-bottom: 4px;
-            display: flex;
-            gap: 6px;
-            align-items: center;
-            color: #666;
-        }
-
-        /* 吹き出しとボタンをまとめるコンテナ */
-        .chat-bubble-container {
-            display: flex;
-            align-items: flex-end;
-            gap: 8px;
-            max-width: 80%;
-        }
-
-        /* 1. 投稿者・管理人（左側配置） */
-        .role-author {
-            align-items: flex-start;
-        }
-
-        .role-author .chat-bubble {
-            background-color: #e8f5e9;
-            color: #1b5e20;
-            border-top-left-radius: 2px;
-        }
-
-        .badge-author {
-            background: #2e7d32;
-            color: white;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: bold;
-        }
-
-        .role-admin {
-            align-items: center;
-        }
-
-        .role-admin .chat-bubble {
-            background-color: #fff3e0;
-            color: #e65100;
-            border: 1px solid #ffe0b2;
-        }
-
-        .badge-admin {
-            background: #ff8c00;
-            color: white;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: bold;
-        }
-
-        /* 2. 助っ人（右側配置・LINE風） */
-        .role-helper {
-            align-items: flex-end;
-        }
-
-        .role-helper .chat-header {
-            justify-content: flex-end;
-        }
-
-        .role-helper .chat-bubble {
-            background-color: #e3f2fd;
-            color: #0d47a1;
-            border-top-right-radius: 2px;
-        }
-
-        .role-helper .chat-bubble-container {
-            flex-direction: row-reverse;
-            margin-left: auto;
-        }
-
-        .badge-helper {
-            background: #1976d2;
-            color: white;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: bold;
-        }
-
-        /* 吹き出し本体（文字数に合わせて幅が変わり、余白なくきれいに折り返す） */
-        .chat-bubble {
-            padding: 10px 14px;
-            border-radius: 12px;
-            font-size: 15px;
-            line-height: 1.5;
-            word-break: break-word;
-            overflow-wrap: anywhere;
-            white-space: pre-wrap;
-            text-align: left;
-            display: inline-block;
-        }
-
-        /* メッセージ取り消しボタン */
-        .btn-delete-msg {
-            background: none;
-            border: 1px solid #ffcdd2;
-            color: #d32f2f;
-            font-size: 11px;
-            padding: 3px 8px;
-            border-radius: 4px;
-            cursor: pointer;
-            text-decoration: none;
-            transition: background 0.2s;
-            white-space: nowrap;
-            height: fit-content;
-        }
-
-        .btn-delete-msg:hover {
-            background: #ffebee;
-        }
-
-        /* 入力フォーム */
-        .chat-form {
-            display: flex;
-            gap: 8px;
-        }
-
-        .chat-input {
-            flex: 1;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 15px;
-        }
-
-        .btn-send {
-            background: #ff8c00;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .btn-send:hover {
-            opacity: 0.9;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .btn-action {
-            display: inline-block;
-            padding: 10px 20px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 14px;
-            text-align: center;
-        }
-
-        .btn-apply {
-            background-color: #2e7d32;
-            color: white;
-        }
-
-        .btn-edit {
-            background-color: #1976d2;
-            color: white;
-        }
-
-        .btn-delete {
-            background-color: #d32f2f;
-            color: white;
-        }
-    </style>
+    <!-- 分けたCSSファイルを正しく読み込みます -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/detail.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/area-map.css') }}">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous">
 </head>
 
 <body>
     <div class="container">
         <a href="{{ url_for('index') }}" class="back-link">🏠 案件一覧に戻る</a>
+        <div id="confirmation-notification" class="confirmation-notification" role="status" aria-live="polite" aria-atomic="true" hidden>
+            <strong>🔔 あなたへの依頼が確定しました！</strong>
+            <span>依頼者があなたにお願いすることを承諾しました。</span>
+            <a href="#contact-details" class="notification-link">住所・連絡先を確認する ↓</a>
+        </div>
+
+        <div id="completion-notification" class="confirmation-notification" role="status" aria-live="polite" hidden>
+            <strong>✓ この依頼は終了しました</strong>
+            <span>依頼者が終了を確認しました。お手伝いありがとうございました。</span>
+        </div>
 
         <!-- 案件詳細情報カード -->
         <div class="card">
             <h1>{{ post.title }}</h1>
+            {% if post.is_completed or (current_user.is_authenticated and (current_user == post.author or current_user == post.helper) and post.helper) %}
+            <div id="request-status" class="request-status{% if post.contact_shared %} request-status-confirmed{% endif %}" role="status" aria-live="polite" data-state="{{ 'completed' if post.is_completed else 'confirmed' if post.contact_shared else 'pending' }}" data-viewer="{{ 'author' if current_user == post.author else 'helper' if current_user == post.helper else 'other' }}">
+                {% if post.is_completed %}
+                <strong class="confirmation-heading">✓ この依頼は終了しました</strong>
+                <span>お手伝いは終了済みです。ありがとうございました。</span>
+                {% elif post.contact_shared %}
+                {% if current_user == post.helper %}
+                <strong class="confirmation-heading">✓ あなたへの依頼が確定しました！</strong>
+                <span>{{ post.author.username }}さんがあなたへの依頼を承諾しました。日時・作業場所を確認して、当日に備えましょう。</span>
+                <a href="#contact-details" class="decision-jump">公開された住所・連絡先を確認する ↓</a>
+                {% else %}
+                <strong>✓ 依頼確定済み</strong>
+                <span>{{ post.helper.username }}さんへの依頼が確定し、住所・連絡先を公開しています。</span>
+                <form action="{{ url_for('complete_post', post_id=post.id) }}" method="POST" data-confirm="お手伝いが完了したことを確認し、この依頼を終了します。終了後は募集に戻せません。よろしいですか？">
+                    {{ approval_form.hidden_tag() }}
+                    <button type="submit" class="btn-confirm-request">この依頼を終了する</button>
+                </form>
+                <span>作業が完了したら押してください。終了後もチャットの履歴を確認できます。</span>
+                {% endif %}
+                {% else %}
+                <strong>💬 相談中・依頼はまだ確定していません</strong>
+                {% if current_user == post.author %}
+                <span>まずはチャットで日時や作業内容を相談してください。</span>
+                <a href="#request-decision" class="decision-jump">相談が済んだら、依頼の確定へ ↓</a>
+                {% else %}
+                <span>チャットで相談し、依頼者の確定をお待ちください。住所・連絡先はまだ非公開です。</span>
+                {% endif %}
+                {% endif %}
+            </div>
+            {% endif %}
             <div class="meta-info">
                 📍 大まかな場所: {{ post.location }}<br>
                 🗓️ 実施希望日時: {{ post.desired_date }}<br>
@@ -298,36 +70,42 @@
                 {{ post.content }}
             </div>
 
+            {% with map_location=post.location or '' %}
+            {% include '_area_map.html' %}
+            {% endwith %}
+
             {% if post.recommendation %}
-            <div style="font-size: 14px; color: #555; margin-bottom: 15px;">
+            <div class="recommendation">
                 💡 <strong>推奨する助っ人像:</strong> {{ post.recommendation }}
             </div>
             {% endif %}
 
             {% if post.image_path %}
-            <div style="margin-bottom: 20px; text-align: center;">
-                <img src="{{ url_for('uploaded_file', filename=post.image_path) }}" alt="現場写真" style="max-width: 100%; border-radius: 8px; max-height: 300px;">
+            <div class="post-image-wrapper">
+                <img src="{{ url_for('uploaded_file', filename=post.image_path) }}" alt="現場写真" class="post-image">
             </div>
             {% endif %}
 
             <!-- 詳細な住所・連絡先の開示（関係者のみ） -->
-            {% if current_user.is_authenticated and (current_user == post.author or current_user == post.helper or current_user.is_admin) %}
-            <div style="background: #e8f5e9; border-left: 4px solid #2e7d32; padding: 12px 16px; border-radius: 0 8px 8px 0; margin-top: 15px; font-size: 14px;">
+            <div id="contact-details">
+            {% if current_user.is_authenticated and (current_user == post.author or (current_user == post.helper and post.contact_shared)) %}
+            <div class="private-contact">
                 🔒 <strong>【関係者用】詳細な住所・連絡先:</strong><br>
                 {{ post.detail_address or '未設定' }}
             </div>
             {% else %}
-            <div style="background: #fff3e0; border-left: 4px solid #ff8c00; padding: 12px 16px; border-radius: 0 8px 8px 0; margin-top: 15px; font-size: 13px; color: #e65100;">
-                🔒 詳細な住所・連絡先は、助っ人が決定した後に当事者間でのみ開示されます。
+            <div class="contact-notice">
+                🔒 詳細な住所・連絡先は、チャットで相談した後、依頼者が承諾するまで公開されません。
             </div>
             {% endif %}
+            </div>
 
             <div class="action-buttons">
                 {% if current_user.is_authenticated %}
                 {% if current_user == post.author or current_user.is_admin %}
                 <a href="{{ url_for('edit_post', post_id=post.id) }}" class="btn-action btn-edit">✏️ 編集する</a>
-                <a href="{{ url_for('delete_post', post_id=post.id) }}" class="btn-action btn-delete" onclick="return confirm('本当に削除しますか？');">🗑️ 削除する</a>
-                {% elif not post.helper %}
+                <a href="{{ url_for('delete_post', post_id=post.id) }}" class="btn-action btn-delete" data-confirm="本当に削除しますか？">🗑️ 削除する</a>
+                {% elif not post.helper and not post.is_completed %}
                 <a href="{{ url_for('apply_post', post_id=post.id) }}" class="btn-action btn-apply">🤝 助っ人として応募する</a>
                 {% endif %}
                 {% endif %}
@@ -358,59 +136,48 @@
                     <div class="chat-header">
                         {{ badge_html|safe }}
                         <strong>{{ msg.sender.username }}</strong>
-                        <span style="font-size: 11px;">{{ msg.created_at.strftime('%H:%M') }}</span>
+                        <span class="message-time">{{ msg.created_at.strftime('%H:%M') }}</span>
                     </div>
                     <div class="chat-bubble-container">
-                        <div class="chat-bubble">
-                            {{ msg.content }}
-                        </div>
+                        <div class="chat-bubble">{{ msg.content }}</div>
 
                         {% if current_user.is_authenticated and msg.sender == current_user %}
-                        <form action="{{ url_for('delete_message', message_id=msg.id) }}" method="POST" style="margin: 0;" onsubmit="return confirm('このメッセージを取り消しますか？');">
+                        <form action="{{ url_for('delete_message', message_id=msg.id) }}" method="POST" data-confirm="このメッセージを取り消しますか？" class="delete-message-form">
                             <button type="submit" class="btn-delete-msg">取り消し</button>
                         </form>
                         {% endif %}
                     </div>
                 </div>
-                {% else %}
-                <p style="text-align: center; color: #999; font-size: 14px; margin: 20px 0;">まだメッセージはありません。チャットで相談を始めましょう！</p>
                 {% endfor %}
+                {% if not messages %}
+                <p class="empty-chat">まだメッセージはありません。チャットで相談を始めましょう！</p>
+                {% endif %}
             </div>
 
             <form action="{{ url_for('send_message', post_id=post.id) }}" method="POST" class="chat-form">
                 <input type="text" name="message_text" class="chat-input" placeholder="メッセージを入力..." required autocomplete="off">
                 <button type="submit" class="btn-send">送信</button>
             </form>
+
+            {% if current_user == post.author and post.helper and not post.contact_shared and not post.is_completed %}
+            <section id="request-decision" class="request-decision" aria-labelledby="request-decision-title">
+                <h2 id="request-decision-title">相談が済んだら、依頼を確定</h2>
+                <p><strong>{{ post.helper.username }}さん</strong>にお願いする場合は、下のボタンを押してください。</p>
+                <p id="contact-sharing-warning" class="sharing-warning">🔒 確定すると、詳細な住所・連絡先がこの相手に公開されます。</p>
+                <form action="{{ url_for('share_contact', post_id=post.id) }}" method="POST" data-confirm="{{ post.helper.username }}さんに依頼を確定します。詳細な住所・連絡先がこの相手に公開されます。よろしいですか？">
+                    {{ approval_form.hidden_tag() }}
+                    <button type="submit" class="btn-confirm-request" aria-describedby="contact-sharing-warning">この人に依頼する</button>
+                </form>
+                <p class="decision-help">まだ相談中なら、確定せずにチャットを続けてください。</p>
+            </section>
+            {% endif %}
         </div>
         {% endif %}
     </div>
 
-    <script>
-        const chatLogs = document.getElementById('chatLogs');
-        if (chatLogs) {
-            chatLogs.scrollTop = chatLogs.scrollHeight;
-        }
-
-        // 3秒ごとのリアルタイム自動更新
-        {% if is_authorized %}
-        setInterval(function () {
-            fetch(window.location.href)
-                .then(response => response.text())
-                .then(html => {
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(html, 'text/html');
-                    const newChatLogs = doc.getElementById('chatLogs');
-                    if (newChatLogs && chatLogs) {
-                        if (chatLogs.innerHTML !== newChatLogs.innerHTML) {
-                            chatLogs.innerHTML = newChatLogs.innerHTML;
-                            chatLogs.scrollTop = chatLogs.scrollHeight;
-                        }
-                    }
-                })
-                .catch(err => console.log('更新待機中...'));
-        }, 3000);
-        {% endif %}
-    </script>
+    <script src="{{ url_for('static', filename='js/detail.js') }}" defer></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous" defer></script>
+    <script src="{{ url_for('static', filename='js/area-map.js') }}" defer></script>
 </body>
 
 </html>

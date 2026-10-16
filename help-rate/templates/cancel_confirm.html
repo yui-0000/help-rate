@@ -4,27 +4,28 @@
 <head>
     <meta charset="UTF-8">
     <title>応募取り消しの確認 - おらほの助っ人けっぱれーと</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/cancel_confirm.css') }}">
 </head>
 
 <body>
-    <p><a href="{{ url_for('post_detail', post_id=post.id) }}" style="text-decoration: none; font-size: 16px;">⬅️ 案件詳細に戻る</a></p>
+    <p><a href="{{ url_for('post_detail', post_id=post.id) }}" class="back-link">⬅️ 案件詳細に戻る</a></p>
 
     <h1>応募取り消しの確認</h1>
 
-    <div style="border: 1px solid #ccc; padding: 20px; width: 60%; background-color: #fafafa; margin-bottom: 20px;">
+    <div class="post-summary">
         <h3>{{ post.title }}</h3>
         <p><strong>実施希望日時:</strong> {{ post.desired_date or '未設定' }}</p>
         <p><strong>作業場所:</strong> {{ post.location or '未設定' }}</p>
     </div>
 
-    <p style="font-weight: bold; color: #cc0000;">
+    <p class="confirmation-text">
         本当にこのお手伝いの応募を取り消しますか？<br>
-        <span style="font-size: 14px; color: #666; font-weight: normal;">※取り消すと案件は再び「募集中」に戻ります。</span>
+        <span class="confirmation-hint">※取り消すと案件は再び「募集中」に戻ります。</span>
     </p>
 
     <form action="{{ url_for('cancel_confirm', post_id=post.id) }}" method="POST">
-        <button type="submit" style="background-color: #cc0000; color: white; border: none; padding: 10px 20px; font-size: 16px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-right: 10px;">⚠️ はい、取り消す</button>
-        <a href="{{ url_for('post_detail', post_id=post.id) }}" style="background-color: #aaa; color: white; text-decoration: none; padding: 11px 20px; border-radius: 4px; font-size: 16px; font-weight: bold;">いいえ（戻る）</a>
+        <button type="submit" class="confirm-button">⚠️ はい、取り消す</button>
+        <a href="{{ url_for('post_detail', post_id=post.id) }}" class="cancel-link">いいえ（戻る）</a>
     </form>
 </body>
 

@@ -1,0 +1,42 @@
+            {% if posts %}
+            <div class="card-grid">
+                {% for post in posts %}
+                {% if post.is_completed and (loop.first or not loop.previtem.is_completed) %}
+                <h3 class="completed-group-heading">終了した依頼</h3>
+                {% endif %}
+                {% set state = 'completed' if post.is_completed else 'active' if post.helper_id and post.contact_shared else 'discussing' if post.helper_id else 'open' %}
+                <div class="card status-{{ state }}" data-post-id="{{ post.id }}">
+                    <div>
+                        <div>
+                            <span class="badge status-badge">{{ {'open': '🌱 募集中', 'discussing': '💬 相談中', 'active': '🤝 依頼中', 'completed': '✓ 終了済み'}[state] }}</span>
+                        </div>
+
+                        <div class="card-title">
+                            <a href="{{ url_for('post_detail', post_id=post.id) }}">{{ post.title }}</a>
+                        </div>
+
+                        <div class="card-meta">
+                            📅 実施日時: {{ post.desired_date or '要ご相談' }}<br>
+                            📍 場所: {{ post.location or '平泉町内' }}
+                        </div>
+
+                        <div class="card-desc">
+                            {{ post.content }}
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <a href="{{ url_for('post_detail', post_id=post.id) }}">詳細を見る ➔</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-posts">
+                {% if selected_status is defined and selected_status != 'all' %}
+                この状態の依頼はまだありません。「すべて」から他の依頼も確認できます。
+                {% else %}
+                現在、お手伝いの募集はありません。
+                {% endif %}
+            </div>
+            {% endif %}

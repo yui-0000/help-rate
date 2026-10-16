@@ -1,0 +1,131 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: linear-gradient(110deg, #fceecb 0%, #eef7e6 100%);
+    background-attachment: fixed;
+    margin: 0;
+    padding: 25px 15px;
+    color: #333;
+}
+
+.container {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 20px;
+    color: #2e7d32;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.card {
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+}
+
+label {
+    font-weight: bold;
+    color: #444;
+    display: block;
+    margin-bottom: 6px;
+    font-size: 14px;
+}
+
+.required-badge {
+    display: inline-block;
+    background-color: #d32f2f;
+    color: white;
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    vertical-align: middle;
+    margin-left: 4px;
+}
+
+.optional-badge {
+    display: inline-block;
+    background-color: #9e9e9e;
+    color: white;
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    vertical-align: middle;
+    margin-left: 4px;
+}
+
+input[type="text"],
+input[type="datetime-local"],
+select,
+textarea {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 15px;
+    background-color: #fafafa;
+}
+
+.note-box {
+    background: #fff8e1;
+    border-left: 4px solid #ff8c00;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #5d4037;
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+.btn-submit {
+    background-color: #ff8c00;
+    color: white;
+    padding: 14px 25px;
+    border: none;
+    border-radius: 30px;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    width: 100%;
+    box-shadow: 0 4px 10px rgba(255, 140, 0, 0.3);
+    transition: opacity 0.2s;
+}
+
+.btn-submit:hover {
+    opacity: 0.9;
+}
+
+body .page-title {
+    margin-top: 0;
+    color: #2e7d32;
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+body .submit-row {
+    margin-top: 25px;
+}
+
+.field-help {
+    font-size: 12px;
+    color: #666;
+    margin: -12px 0 20px;
+}
+
+.field-error {
+    color: #d32f2f;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.field-error p {
+    margin: 0 0 20px;
+}

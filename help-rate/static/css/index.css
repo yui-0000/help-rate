@@ -1,0 +1,357 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+    background: linear-gradient(110deg, #fceecb 0%, #eef7e6 100%);
+    background-attachment: fixed;
+    margin: 0;
+    padding: 25px 15px;
+    color: #333333;
+    min-height: 100vh;
+    position: relative;
+}
+
+/* 中央の大きなメインカード */
+.main-wrapper {
+    max-width: 980px;
+    margin: 0 auto;
+    background-color: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+/* ヘッダーエリア */
+.header {
+    padding: 25px 35px 20px 35px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1px solid #f2f2f2;
+}
+
+.header-title-group h1 {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 800;
+    color: #333333;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    letter-spacing: -0.5px;
+}
+
+.header-title-group h1 span.logo-icon {
+    color: #c09e38;
+    font-size: 28px;
+}
+
+.header-title-group p {
+    margin: 6px 0 0 0;
+    font-size: 13px;
+    color: #666666;
+}
+
+/* ヘッダー右側のアクション */
+.header-actions {
+    text-align: right;
+}
+
+.user-nav {
+    font-size: 13px;
+    color: #444444;
+    margin-bottom: 12px;
+}
+
+.user-nav a {
+    color: #333333;
+    text-decoration: underline;
+    margin-left: 8px;
+}
+
+.btn-post-orange {
+    display: inline-block;
+    background-color: #ff8c00;
+    color: #ffffff !important;
+    padding: 10px 22px;
+    border-radius: 20px;
+    text-decoration: none !important;
+    font-size: 13px;
+    font-weight: bold;
+    box-shadow: 0 3px 8px rgba(255, 140, 0, 0.3);
+    transition: opacity 0.2s;
+}
+
+.btn-post-orange:hover {
+    opacity: 0.9;
+}
+
+/* メインコンテンツエリア */
+.content-area {
+    background-color: #fcfbfa;
+    padding: 25px 35px 40px 35px;
+}
+
+.section-heading {
+    font-size: 20px;
+    font-weight: bold;
+    color: #222222;
+    margin: 0 0 20px 0;
+}
+
+/* 3列グリッドレイアウト */
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+@media (max-width: 860px) {
+    .card-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 580px) {
+    .card-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .header {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .header-actions {
+        text-align: left;
+    }
+}
+
+/* 個別カード */
+.card {
+    background-color: #ffffff;
+    border-radius: 14px;
+    padding: 18px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
+    border: 1px solid #eeeeee;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 200px;
+}
+
+/* バッジ */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.status-open {
+    --status-color: #2e7d32;
+    --status-background: #f4fbf4;
+}
+
+.status-all {
+    --status-color: #455a64;
+}
+
+.status-filter {
+    text-decoration: none;
+    border: 2px solid transparent;
+    min-height: 44px;
+}
+
+.status-filter[aria-current="page"] {
+    outline: 3px solid var(--status-color);
+    outline-offset: 3px;
+    border-color: #fff;
+}
+
+.status-filter:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.status-filter:focus-visible {
+    outline: 3px solid #222;
+    outline-offset: 3px;
+}
+
+.completed-group-heading {
+    grid-column: 1 / -1;
+    margin: 16px 0 0;
+    padding-top: 20px;
+    border-top: 2px solid #d9dce0;
+    color: #5f6368;
+    font-size: 17px;
+}
+
+.status-discussing {
+    --status-color: #a35a00;
+    --status-background: #fff9ed;
+}
+
+.status-active {
+    --status-color: #1565c0;
+    --status-background: #f0f7ff;
+}
+
+.status-completed {
+    --status-color: #5f6368;
+    --status-background: #f3f4f5;
+}
+
+.card[data-post-id] {
+    border-top: 5px solid var(--status-color);
+    background: var(--status-background);
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.status-badge {
+    background: var(--status-color);
+    color: #fff;
+    font-size: 13px;
+    padding: 5px 12px;
+}
+
+.list-guide {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 12px;
+}
+
+.posts-update-status {
+    margin: 0 0 20px;
+    font-size: 12px;
+    line-height: 1.6;
+    color: #555;
+}
+
+/* カードタイトル・情報 */
+.card-title {
+    margin: 10px 0 8px 0;
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 1.35;
+    color: #111111;
+}
+
+.card-title a {
+    color: #111111;
+    text-decoration: none;
+}
+
+.card-meta {
+    font-size: 12px;
+    color: #555555;
+    line-height: 1.6;
+    margin-bottom: 8px;
+}
+
+.card-desc {
+    font-size: 12px;
+    color: #666666;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* カードフッター */
+.card-footer {
+    text-align: right;
+    margin-top: 12px;
+    padding-top: 8px;
+}
+
+.card-footer a {
+    color: #2e7d32;
+    font-weight: bold;
+    font-size: 12px;
+    text-decoration: none;
+}
+
+/* 右下の平泉マップバッジ（大まかなGoogleマップリンク） */
+.hiraizumi-map-badge {
+    position: fixed;
+    bottom: 20px;
+    right: 25px;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 8px 14px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid #e2e2e2;
+    z-index: 999;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.hiraizumi-map-badge:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.map-icon-box {
+    width: 38px;
+    height: 38px;
+    background: #a3c995;
+    border-radius: 8px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.map-pin {
+    color: #d32f2f;
+    font-size: 16px;
+}
+
+.sakura-icon {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    font-size: 16px;
+}
+
+.map-text {
+    font-size: 12px;
+    font-weight: bold;
+    color: #2e7d32;
+}
+
+.alert-bar {
+    padding: 10px 15px;
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    font-size: 13px;
+    text-align: center;
+}
+
+body .login-link {
+    margin-left:0;
+}
+
+body .empty-posts {
+    text-align: center;
+    color: #888888;
+    padding: 50px 0;
+    background: #ffffff;
+    border-radius: 12px;
+}
