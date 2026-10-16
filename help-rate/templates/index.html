@@ -21,7 +21,7 @@
             position: relative;
         }
 
-        /* 中央の大きなメインカード（全体を包むコンテナ） */
+        /* 中央の大きなメインカード */
         .main-wrapper {
             max-width: 980px;
             margin: 0 auto;
@@ -97,7 +97,7 @@
             opacity: 0.9;
         }
 
-        /* メインコンテンツエリア（薄ベージュ内背景） */
+        /* メインコンテンツエリア */
         .content-area {
             background-color: #fcfbfa;
             padding: 25px 35px 40px 35px;
@@ -217,27 +217,34 @@
             text-decoration: none;
         }
 
-        /* 右下の平泉イラストバッジ */
+        /* 右下の平泉マップバッジ（大まかなGoogleマップリンク） */
         .hiraizumi-map-badge {
             position: fixed;
             bottom: 20px;
             right: 25px;
             background: #ffffff;
-            border-radius: 10px;
-            padding: 6px 10px;
+            border-radius: 12px;
+            padding: 8px 14px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             border: 1px solid #e2e2e2;
             z-index: 999;
+            text-decoration: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .hiraizumi-map-badge:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
         }
 
         .map-icon-box {
             width: 38px;
             height: 38px;
             background: #a3c995;
-            border-radius: 6px;
+            border-radius: 8px;
             position: relative;
             display: flex;
             align-items: center;
@@ -259,7 +266,7 @@
         .map-text {
             font-size: 12px;
             font-weight: bold;
-            color: #333333;
+            color: #2e7d32;
         }
 
         .alert-bar {
@@ -331,8 +338,8 @@
                         </div>
 
                         <div class="card-meta">
-                            📅 実施日時: {{ post.desired_date or '10月25日 13:00〜' }}<br>
-                            📍 場所: {{ post.location or '平泉字衣関' }}
+                            📅 実施日時: {{ post.desired_date or '要ご相談' }}<br>
+                            📍 場所: {{ post.location or '平泉町内' }}
                         </div>
 
                         <div class="card-desc">
@@ -355,14 +362,14 @@
         </div>
     </div>
 
-    <!-- 右下の和風マップアイコンアクセント -->
-    <div class="hiraizumi-map-badge">
+    <!-- 右下の和風マップアイコン（クリックで平泉町の大まかなGoogleマップを開く） -->
+    <a href="https://www.google.com/maps/search/?api=1&query=岩手県平泉町" target="_blank" rel="noopener noreferrer" class="hiraizumi-map-badge" title="平泉町のおおよその地図を見る">
         <div class="map-icon-box">
             <span class="map-pin">📍</span>
             <span class="sakura-icon">🌸</span>
         </div>
-        <span class="map-text">Hiraizumi</span>
-    </div>
+        <span class="map-text">平泉エリア地図 ➔</span>
+    </a>
 
 </body>
 

@@ -1,16 +1,19 @@
 import os
-from flask import Flask, render_template, redirect, url_for, flash, request, send_from_directory
+from flask import Flask, render_template, redirect, url_for, request, flash, send_from_directory
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
-from dotenv import load_dotenv
-from models import db, User, Post
-from forms import RegisterForm, LoginForm, PostForm
+from flask_wtf import FlaskForm
+from flask_wtf.file import FileField, FileAllowed
+from wtforms import StringField, PasswordField, TextAreaField, SubmitField, IntegerField, SelectField
+from wtforms.validators import DataRequired, Optional
 
-load_dotenv()
+from models import User, Post, Message, initialize
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "default-secret-key")
+app.config["SECRET_KEY"] = "hiraizumi-secret-key"
 app.config["UPLOAD_FOLDER"] = "uploads"
+os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -20,20 +23,79 @@ login_manager.login_view = "login"
 @login_manager.user_loader
 def load_user(user_id):
     try:
-        return User.get_by_id(int(user_id))
+        return User.get_by_id(user_id)
     except User.DoesNotExist:
         return None
 
 
-@app.before_request
-def before_request():
-    db.connect()
+class RegisterForm(FlaskForm):
+    username = StringField(
+        "ニックネーム（ウェブ表示名・重複不可）",
+        validators=[DataRequired(message="ニックネームを入力してください。")],
+    )
+    last_name = StringField("姓（苗字）", validators=[DataRequired(message="姓を入力してください。")])
+    first_name = StringField("名（名前）", validators=[DataRequired(message="名を入力してください。")])
+    last_name_kana = StringField(
+        "姓のふりがな", validators=[DataRequired(message="姓のふりがなを入力してください。")]
+    )
+    first_name_kana = StringField(
+        "名のふりがな", validators=[DataRequired(message="名のふりがなを入力してください。")]
+    )
+
+    email = StringField("メールアドレス（任意・代理人のものでも可）", validators=[Optional()])
+    password = PasswordField(
+        "パスワード", validators=[DataRequired(message="パスワードを入力してください。")]
+    )
+    phone = StringField("電話番号", validators=[Optional()])
+    gender = SelectField(
+        "性別",
+        choices=[("", "選択してください"), ("男性", "男性"), ("女性", "女性"), ("その他", "その他")],
+        validators=[DataRequired(message="性別を選択してください。")],
+    )
+    age = IntegerField("年齢", validators=[Optional()])
+    submit = SubmitField("登録する")
 
 
-@app.teardown_request
-def teardown_request(exc):
-    if not db.is_closed():
-        db.close()
+class LoginForm(FlaskForm):
+    login_id = StringField(
+        "ログインID（ニックネーム / メール / 電話番号）",
+        validators=[DataRequired(message="ニックネーム、メールアドレス、または電話番号を入力してください。")],
+    )
+    password = PasswordField(
+        "パスワード", validators=[DataRequired(message="パスワードを入力してください。")]
+    )
+    submit = SubmitField("ログイン")
+
+
+class PostForm(FlaskForm):
+    title = StringField("タイトル", validators=[DataRequired()])
+    content = TextAreaField("内容", validators=[DataRequired()])
+    desired_date = StringField("実施希望日時", validators=[DataRequired()])
+    location = SelectField(
+        "大まかな場所（地区名など）",
+        choices=[
+            ("平泉地区", "平泉地区"),
+            ("衣川地区", "衣川地区"),
+            ("中尊寺周辺", "中尊寺周辺"),
+            ("平泉駅周辺", "平泉駅周辺"),
+            ("その他・町内全域", "その他・町内全域"),
+        ],
+        validators=[DataRequired()],
+    )
+    detail_address = StringField("詳細な住所・連絡先", validators=[DataRequired()])
+    contact_method = SelectField(
+        "連絡希望方法",
+        choices=[
+            ("電話", "電話"),
+            ("メール", "メール"),
+            ("アプリ内チャット(Chat)", "アプリ内チャット(Chat)"),
+        ],
+        validators=[DataRequired()],
+    )
+    reward = StringField("謝礼")
+    recommendation = StringField("推奨する助っ人像")
+    image = FileField("現場写真", validators=[FileAllowed(["jpg", "png", "jpeg"], "Images only!")])
+    submit = SubmitField("投稿する")
 
 
 @app.route("/")
@@ -42,59 +104,75 @@ def index():
     return render_template("index.html", posts=posts)
 
 
-@app.route("/uploads/<filename>")
-def uploaded_file(filename):
-    return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
-
-
 @app.route("/register", methods=["GET", "POST"])
 def register():
-    if current_user.is_authenticated:
-        return redirect(url_for("index"))
-
     form = RegisterForm()
-    if form.validate_on_submit():
-        if User.select().where(User.email == form.email.data).exists():
-            flash("このメールアドレスは既に登録されています。", "danger")
+    if request.method == "POST":
+        phone_val = request.form.get("phone", "").strip()
+        if not phone_val or phone_val == "--":
+            flash("電話番号を入力してください。", "danger")
             return render_template("register.html", form=form)
 
-        # 「未選択・非公開」の場合は None として保存
-        selected_age = form.age_group.data
-        selected_gender = form.gender.data
+        if form.validate_on_submit():
+            email_val = form.email.data.strip() if form.email.data else ""
+            if email_val and "@" not in email_val:
+                flash("有効なメールアドレスを入力してください（@が含まれていません）。", "danger")
+                return render_template("register.html", form=form)
 
-        user = User(
-            username=form.username.data,
-            email=form.email.data,
-            age_group=selected_age if selected_age and selected_age != "未選択・非公開" else None,
-            gender=selected_gender if selected_gender and selected_gender != "未選択・非公開" else None,
-        )
-        user.set_password(form.password.data)
-        user.save()
-
-        flash("アカウントが作成されました！ログインしてください。", "success")
-        return redirect(url_for("login"))
+            try:
+                User.get(User.username == form.username.data)
+                flash(
+                    "そのニックネームはすでに使われています。別のニックネームを指定してください。", "danger"
+                )
+            except User.DoesNotExist:
+                hashed_password = generate_password_hash(form.password.data)
+                is_first = User.select().count() == 0
+                User.create(
+                    username=form.username.data,
+                    last_name=form.last_name.data,
+                    first_name=form.first_name.data,
+                    last_name_kana=form.last_name_kana.data,
+                    first_name_kana=form.first_name_kana.data,
+                    email=email_val or None,
+                    password=hashed_password,
+                    phone=phone_val,
+                    gender=form.gender.data,
+                    age=form.age.data,
+                    is_admin=is_first,
+                )
+                flash("ユーザー登録が完了しました。ログインしてください。", "success")
+                return redirect(url_for("login"))
+        else:
+            error_messages = []
+            for field, errors in form.errors.items():
+                for error in errors:
+                    error_messages.append(error)
+            if error_messages:
+                flash("入力エラー: " + " / ".join(error_messages), "danger")
+            else:
+                flash("入力内容に誤りがあります。項目をご確認ください。", "danger")
 
     return render_template("register.html", form=form)
 
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    if current_user.is_authenticated:
-        return redirect(url_for("index"))
-
     form = LoginForm()
     if form.validate_on_submit():
+        user = None
+        identifier = form.login_id.data.strip()
         try:
-            user = User.get(User.email == form.email.data)
-            if user.check_password(form.password.data):
-                login_user(user)
-                flash("ログインしました！", "success")
-                return redirect(url_for("index"))
-            else:
-                flash("メールアドレスまたはパスワードが間違っています。", "danger")
+            user = User.get(
+                (User.username == identifier) | (User.email == identifier) | (User.phone == identifier)
+            )
         except User.DoesNotExist:
-            flash("メールアドレスまたはパスワードが間違っています。", "danger")
+            pass
 
+        if user and check_password_hash(user.password, form.password.data):
+            login_user(user)
+            return redirect(url_for("index"))
+        else:
+            flash("ログインID（ニックネーム / メール / 電話番号）またはパスワードが間違っています。")
     return render_template("login.html", form=form)
 
 
@@ -102,7 +180,6 @@ def login():
 @login_required
 def logout():
     logout_user()
-    flash("ログアウトしました。", "info")
     return redirect(url_for("index"))
 
 
@@ -111,30 +188,26 @@ def logout():
 def create_post():
     form = PostForm()
     if form.validate_on_submit():
-        image_filename = None
-        image_file = form.image.data
-        if image_file and image_file.filename:
-            filename = secure_filename(image_file.filename)
-            filename = filename.replace(" ", "_")
-
-            os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
-            file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-            image_file.save(file_path)
-            image_filename = filename
+        filename = None
+        if form.image.data:
+            f = form.image.data
+            filename = secure_filename(f.filename)
+            f.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
 
         Post.create(
             title=form.title.data,
             content=form.content.data,
             desired_date=form.desired_date.data,
             location=form.location.data,
+            detail_address=form.detail_address.data,
+            contact_method=form.contact_method.data,
             reward=form.reward.data,
             recommendation=form.recommendation.data,
-            image_path=image_filename,
+            image_path=filename,
             author=current_user,
         )
-        flash("新しいお手伝い案件を投稿しました！", "success")
+        flash("お手伝い案件を投稿しました！")
         return redirect(url_for("index"))
-
     return render_template("post.html", form=form)
 
 
@@ -142,127 +215,147 @@ def create_post():
 def post_detail(post_id):
     try:
         post = Post.get_by_id(post_id)
-        return render_template("detail.html", post=post)
     except Post.DoesNotExist:
-        flash("該当する案件が見つかりませんでした。", "danger")
+        flash("指定された案件は見つかりません。")
         return redirect(url_for("index"))
 
+    messages = []
+    is_authorized = current_user.is_authenticated and (
+        post.author == current_user or post.helper == current_user or current_user.is_admin
+    )
 
-@app.route("/apply/<int:post_id>", methods=["GET", "POST"])
+    if is_authorized:
+        messages = Message.select().where(Message.post == post).order_by(Message.created_at.asc())
+
+    return render_template("detail.html", post=post, messages=messages, is_authorized=is_authorized)
+
+
+@app.route("/post/<int:post_id>/message", methods=["POST"])
 @login_required
-def apply_post(post_id):
-    try:
-        post = Post.get_by_id(post_id)
-        if post.author == current_user:
-            flash("ご自身の投稿には応募できません。", "warning")
-            return redirect(url_for("post_detail", post_id=post.id))
+def send_message(post_id):
+    post = Post.get_by_id(post_id)
+    if not (post.author == current_user or post.helper == current_user or current_user.is_admin):
+        flash("このチャットに書き込む権限がありません。")
+        return redirect(url_for("post_detail", post_id=post.id))
 
-        if post.helper:
-            flash("この案件はすでに他の助っ人が決定しています。", "info")
-            return redirect(url_for("post_detail", post_id=post.id))
-
-        if request.method == "POST":
-            message = request.form.get("helper_message")
-            post.helper = current_user
-            post.helper_message = message if message else "よろしくお願いします！"
-            post.save()
-            flash("このお手伝いへの応募が完了しました！依頼者からの連絡をお待ちください。", "success")
-            return redirect(url_for("post_detail", post_id=post.id))
-
-        return render_template("apply_confirm.html", post=post)
-
-    except Post.DoesNotExist:
-        flash("該当する案件が見つかりませんでした。", "danger")
-        return redirect(url_for("index"))
+    message_text = request.form.get("message_text")
+    if message_text:
+        Message.create(post=post, sender=current_user, content=message_text)
+    return redirect(url_for("post_detail", post_id=post.id))
 
 
-@app.route("/cancel_confirm/<int:post_id>", methods=["GET", "POST"])
+@app.route("/message/<int:message_id>/delete", methods=["POST"])
 @login_required
-def cancel_confirm(post_id):
+def delete_message(message_id):
     try:
-        post = Post.get_by_id(post_id)
-        if post.helper != current_user:
-            flash("取り消し権限がありません。", "danger")
-            return redirect(url_for("post_detail", post_id=post.id))
-
-        if request.method == "POST":
-            post.helper = None
-            post.helper_message = None
-            post.save()
-            flash("お手伝いの応募を取り消しました。", "info")
-            return redirect(url_for("post_detail", post_id=post.id))
-
-        return render_template("cancel_confirm.html", post=post)
-
-    except Post.DoesNotExist:
-        flash("該当する案件が見つかりませんでした。", "danger")
+        msg = Message.get_by_id(message_id)
+        if msg.sender == current_user or current_user.is_admin:
+            post_id = msg.post.id
+            msg.delete_instance()
+            flash("メッセージを取り消しました。")
+            return redirect(url_for("post_detail", post_id=post_id))
+        else:
+            flash("このメッセージを削除する権限がありません。")
+            return redirect(url_for("index"))
+    except Message.DoesNotExist:
+        flash("指定されたメッセージは見つかりません。")
         return redirect(url_for("index"))
 
 
-@app.route("/edit/<int:post_id>", methods=["GET", "POST"])
+@app.route("/post/<int:post_id>/edit", methods=["GET", "POST"])
 @login_required
 def edit_post(post_id):
-    try:
-        post = Post.get_by_id(post_id)
-        if post.author != current_user:
-            flash("他のユーザーの投稿は編集できません。", "danger")
-            return redirect(url_for("index"))
+    post = Post.get_by_id(post_id)
+    if post.author != current_user and not current_user.is_admin:
+        flash("編集権限がありません。")
+        return redirect(url_for("post_detail", post_id=post.id))
 
-        form = PostForm(obj=post)
-        if form.validate_on_submit():
-            post.title = form.title.data
-            post.content = form.content.data
-            post.desired_date = form.desired_date.data
-            post.location = form.location.data
-            post.reward = form.reward.data
-            post.recommendation = form.recommendation.data
+    form = PostForm(obj=post)
+    if form.validate_on_submit():
+        post.title = form.title.data
+        post.content = form.content.data
+        post.desired_date = form.desired_date.data
+        post.location = form.location.data
+        post.detail_address = form.detail_address.data
+        post.contact_method = form.contact_method.data
+        post.reward = form.reward.data
+        post.recommendation = form.recommendation.data
 
-            image_file = form.image.data
-            if image_file and image_file.filename:
-                filename = secure_filename(image_file.filename)
-                filename = filename.replace(" ", "_")
-                os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
-                file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-                image_file.save(file_path)
-                post.image_path = filename
+        if form.image.data:
+            f = form.image.data
+            filename = secure_filename(f.filename)
+            f.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+            post.image_path = filename
 
-            post.save()
-            flash("案件の内容を更新しました！", "success")
-            return redirect(url_for("post_detail", post_id=post.id))
-
-        return render_template("edit.html", form=form, post=post)
-    except Post.DoesNotExist:
-        flash("該当する案件が見つかりませんでした。", "danger")
-        return redirect(url_for("index"))
+        post.save()
+        flash("案件内容を更新しました！")
+        return redirect(url_for("post_detail", post_id=post.id))
+    return render_template("edit.html", form=form, post=post)
 
 
-@app.route("/delete/<int:post_id>", methods=["GET", "POST"])
+@app.route("/post/<int:post_id>/delete")
 @login_required
 def delete_post(post_id):
-    try:
-        post = Post.get_by_id(post_id)
-        if post.author != current_user:
-            flash("他のユーザーの投稿は編集できません。", "danger")
-            return redirect(url_for("index"))
+    post = Post.get_by_id(post_id)
+    if post.author == current_user or current_user.is_admin:
+        Message.delete().where(Message.post == post).execute()
+        post.delete_instance()
+        flash("案件を削除しました。")
+    else:
+        flash("削除権限がありません。")
+    return redirect(url_for("index"))
 
-        if request.method == "POST":
-            if post.image_path:
-                image_path = os.path.join(app.config["UPLOAD_FOLDER"], post.image_path)
-                if os.path.exists(image_path):
-                    os.remove(image_path)
 
-            post.delete_instance()
-            flash("案件を削除しました。", "success")
-            return redirect(url_for("index"))
+@app.route("/post/<int:post_id>/apply", methods=["GET", "POST"])
+@login_required
+def apply_post(post_id):
+    post = Post.get_by_id(post_id)
+    if post.author == current_user:
+        flash("ご自身の案件には応募できません。")
+        return redirect(url_for("post_detail", post_id=post.id))
+    if post.helper:
+        flash("すでに助っ人が決定している案件です。")
+        return redirect(url_for("post_detail", post_id=post.id))
 
-        return render_template("delete_confirm.html", post=post)
-    except Post.DoesNotExist:
-        flash("該当する案件が見つかりませんでした。", "danger")
-        return redirect(url_for("index"))
+    (request.method == "POST")  # カッコのバランスを綺麗に整理
+    if request.method == "POST":
+        helper_message = request.form.get("helper_message")
+        post.helper = current_user
+        post.helper_message = helper_message
+        post.save()
+        flash("助っ人として応募が完了しました！")
+        return redirect(url_for("post_detail", post_id=post.id))
+
+    return (
+        render_template("apply_apply.html", post=post)
+        if False
+        else render_template("apply_confirm.html", post=post)
+    )
+
+
+@app.route("/post/<int:post_id>/cancel", methods=["GET", "POST"])
+@login_required
+def cancel_confirm(post_id):
+    post = Post.get_by_id(post_id)
+    if post.helper != current_user:
+        flash("この応募を取り消す権限はありません。")
+        return redirect(url_for("post_detail", post_id=post.id))
+
+    if request.method == "POST":
+        post.helper = None
+        post.helper_message = None
+        post.save()
+        flash("応募を取り消しました。")
+        return redirect(url_for("post_detail", post_id=post.id))
+
+    return render_template("cancel_confirm.html", post=post)
+
+
+@app.route("/uploads/<filename>")
+def uploaded_file(filename):
+    return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
 
 
 if __name__ == "__main__":
-    db.connect()
-    db.create_tables([User, Post], safe=True)
-    db.close()
-    app.run(debug=True, port=8000)
+    initialize()
+    app.run(port=8000, debug=True)

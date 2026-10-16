@@ -6,17 +6,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ post.title }} - おらほの助っ人けっぱれーと</title>
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Meiryo", sans-serif;
-            background: linear-gradient(135deg, #fef9e7 0%, #edf7ed 100%);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(110deg, #fceecb 0%, #eef7e6 100%);
             background-attachment: fixed;
             margin: 0;
-            padding: 20px;
+            padding: 25px 15px;
             color: #333;
+            font-size: 16px;
         }
 
         .container {
-            max-width: 800px;
+            width: 100%;
+            max-width: 650px;
             margin: 0 auto;
         }
 
@@ -26,180 +32,385 @@
             color: #2e7d32;
             text-decoration: none;
             font-weight: bold;
+            font-size: 15px;
         }
 
         .card {
             background-color: #ffffff;
             border-radius: 16px;
             padding: 30px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+            margin-bottom: 25px;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
+        h1 {
+            color: #2e7d32;
+            margin-top: 0;
+            font-size: 22px;
         }
 
-        th,
-        td {
-            padding: 14px;
-            border-bottom: 1px solid #f0f0f0;
-            text-align: left;
-            font-size: 15px;
-        }
-
-        th {
-            background-color: #f8f9fa;
-            width: 32%;
-            color: #555;
-            font-weight: 600;
-            border-radius: 6px 0 0 6px;
+        .meta-info {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.6;
         }
 
         .content-box {
+            font-size: 16px;
+            line-height: 1.6;
             background: #fafafa;
-            padding: 20px;
-            border-radius: 10px;
-            border: 1px solid #eee;
-            white-space: pre-wrap;
-            line-height: 1.7;
-            margin-top: 10px;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
         }
 
-        .btn {
+        /* チャットエリア全体 */
+        .chat-section {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+            margin-bottom: 40px;
+        }
+
+        .chat-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2e7d32;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #e8f5e9;
+            padding-bottom: 8px;
+        }
+
+        .chat-logs {
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #eee;
+        }
+
+        /* メッセージごとの行 */
+        .chat-message {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .chat-header {
+            font-size: 12px;
+            margin-bottom: 4px;
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            color: #666;
+        }
+
+        /* 吹き出しとボタンをまとめるコンテナ */
+        .chat-bubble-container {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            max-width: 80%;
+        }
+
+        /* 1. 投稿者・管理人（左側配置） */
+        .role-author {
+            align-items: flex-start;
+        }
+
+        .role-author .chat-bubble {
+            background-color: #e8f5e9;
+            color: #1b5e20;
+            border-top-left-radius: 2px;
+        }
+
+        .badge-author {
+            background: #2e7d32;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .role-admin {
+            align-items: center;
+        }
+
+        .role-admin .chat-bubble {
+            background-color: #fff3e0;
+            color: #e65100;
+            border: 1px solid #ffe0b2;
+        }
+
+        .badge-admin {
+            background: #ff8c00;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        /* 2. 助っ人（右側配置・LINE風） */
+        .role-helper {
+            align-items: flex-end;
+        }
+
+        .role-helper .chat-header {
+            justify-content: flex-end;
+        }
+
+        .role-helper .chat-bubble {
+            background-color: #e3f2fd;
+            color: #0d47a1;
+            border-top-right-radius: 2px;
+        }
+
+        .role-helper .chat-bubble-container {
+            flex-direction: row-reverse;
+            margin-left: auto;
+        }
+
+        .badge-helper {
+            background: #1976d2;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        /* 吹き出し本体（文字数に合わせて幅が変わり、余白なくきれいに折り返す） */
+        .chat-bubble {
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 15px;
+            line-height: 1.5;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+            white-space: pre-wrap;
+            text-align: left;
             display: inline-block;
-            padding: 12px 24px;
-            border-radius: 30px;
+        }
+
+        /* メッセージ取り消しボタン */
+        .btn-delete-msg {
+            background: none;
+            border: 1px solid #ffcdd2;
+            color: #d32f2f;
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s;
+            white-space: nowrap;
+            height: fit-content;
+        }
+
+        .btn-delete-msg:hover {
+            background: #ffebee;
+        }
+
+        /* 入力フォーム */
+        .chat-form {
+            display: flex;
+            gap: 8px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+
+        .btn-send {
+            background: #ff8c00;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-send:hover {
+            opacity: 0.9;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-action {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 8px;
             text-decoration: none;
             font-weight: bold;
-            border: none;
-            cursor: pointer;
-            font-size: 15px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-            transition: transform 0.1s;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
+            font-size: 14px;
+            text-align: center;
         }
 
         .btn-apply {
-            background-color: #ff8c00;
-            color: white;
-        }
-
-        .btn-cancel {
-            background-color: #d32f2f;
+            background-color: #2e7d32;
             color: white;
         }
 
         .btn-edit {
-            background-color: #2e7d32;
+            background-color: #1976d2;
             color: white;
-            margin-right: 10px;
         }
 
         .btn-delete {
-            background-color: #e0e0e0;
-            color: #555;
-        }
-
-        .alert {
-            padding: 14px;
-            background-color: #e8f5e9;
-            color: #2e7d32;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            text-align: center;
-            font-weight: bold;
+            background-color: #d32f2f;
+            color: white;
         }
     </style>
 </head>
 
 <body>
     <div class="container">
-        <a href="{{ url_for('index') }}" class="back-link">🏠 ホーム画面に戻る</a>
+        <a href="{{ url_for('index') }}" class="back-link">🏠 案件一覧に戻る</a>
 
-        {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-        {% for category, message in messages %}
-        <div class="alert">{{ message }}</div>
-        {% endfor %}
-        {% endif %}
-        {% endwith %}
-
+        <!-- 案件詳細情報カード -->
         <div class="card">
-            <h2 style="margin-top: 0; color: #2c3e50; font-size: 24px;">{{ post.title }}</h2>
+            <h1>{{ post.title }}</h1>
+            <div class="meta-info">
+                📍 大まかな場所: {{ post.location }}<br>
+                🗓️ 実施希望日時: {{ post.desired_date }}<br>
+                👤 投稿者: {{ post.author.username }}<br>
+                🎁 謝礼: {{ post.reward or 'なし' }}
+            </div>
 
-            <table>
-                <tr>
-                    <th>実施希望日時</th>
-                    <td>{{ post.desired_date or '未設定' }}</td>
-                </tr>
-                <tr>
-                    <th>作業場所</th>
-                    <td>{{ post.location or '未設定' }}</td>
-                </tr>
-                <tr>
-                    <th>謝礼</th>
-                    <td>{{ post.reward or '未設定' }}</td>
-                </tr>
-                <tr>
-                    <th>推奨する助っ人像</th>
-                    <td>{{ post.recommendation or '指定なし（どなたでも歓迎）' }}</td>
-                </tr>
-                <tr>
-                    <th>現在の状況</th>
-                    <td>
-                        {% if post.helper %}
-                        <span style="color: #2e7d32; font-weight: bold;">🤝 助っ人決定！（{{ post.helper.username }}さん）</span>
-                        {% if post.helper_message %}
-                        <div style="margin-top: 6px; padding: 8px 12px; background: #e8f5e9; border-radius: 6px; font-size: 14px; color: #2e7d32;">
-                            ひ言メッセージ: 「{{ post.helper_message }}」
-                        </div>
-                        {% endif %}
-                        {% else %}
-                        <span style="color: #1976d2; font-weight: bold;">募集中</span>
-                        {% endif %}
-                    </td>
-                </tr>
-            </table>
+            <div class="content-box">
+                <strong>【お手伝いの内容】</strong><br>
+                {{ post.content }}
+            </div>
 
-            <h3 style="color: #444; margin-top: 25px;">お手伝いの内容詳細</h3>
-            <div class="content-box">{{ post.content }}</div>
-
-            {% if post.image_path %}
-            <h3 style="color: #444; margin-top: 25px;">現場写真</h3>
-            <div style="margin-top: 10px;">
-                <img src="{{ url_for('uploaded_file', filename=post.image_path) }}" alt="現場写真" style="max-width: 100%; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            {% if post.recommendation %}
+            <div style="font-size: 14px; color: #555; margin-bottom: 15px;">
+                💡 <strong>推奨する助っ人像:</strong> {{ post.recommendation }}
             </div>
             {% endif %}
 
-            <p style="color: #888; font-size: 13px; margin-top: 30px; border-top: 1px solid #f0f0f0; padding-top: 15px;">
-                投稿者: {{ post.author.username }}さん | 投稿日時: {{ post.created_at.strftime('%Y-%m-%d %H:%M') }}
-            </p>
+            {% if post.image_path %}
+            <div style="margin-bottom: 20px; text-align: center;">
+                <img src="{{ url_for('uploaded_file', filename=post.image_path) }}" alt="現場写真" style="max-width: 100%; border-radius: 8px; max-height: 300px;">
+            </div>
+            {% endif %}
 
-            <div style="margin-top: 25px; text-align: center;">
+            <!-- 詳細な住所・連絡先の開示（関係者のみ） -->
+            {% if current_user.is_authenticated and (current_user == post.author or current_user == post.helper or current_user.is_admin) %}
+            <div style="background: #e8f5e9; border-left: 4px solid #2e7d32; padding: 12px 16px; border-radius: 0 8px 8px 0; margin-top: 15px; font-size: 14px;">
+                🔒 <strong>【関係者用】詳細な住所・連絡先:</strong><br>
+                {{ post.detail_address or '未設定' }}
+            </div>
+            {% else %}
+            <div style="background: #fff3e0; border-left: 4px solid #ff8c00; padding: 12px 16px; border-radius: 0 8px 8px 0; margin-top: 15px; font-size: 13px; color: #e65100;">
+                🔒 詳細な住所・連絡先は、助っ人が決定した後に当事者間でのみ開示されます。
+            </div>
+            {% endif %}
+
+            <div class="action-buttons">
                 {% if current_user.is_authenticated %}
-                {% if post.author == current_user %}
-                <div style="display: flex; justify-content: center; gap: 10px;">
-                    <a href="{{ url_for('edit_post', post_id=post.id) }}" class="btn btn-edit">✏️ 編集する</a>
-                    <a href="{{ url_for('delete_post', post_id=post.id) }}" class="btn btn-delete">🗑️ 削除する</a>
-                </div>
-                {% else %}
-                {% if post.helper == current_user %}
-                <a href="{{ url_for('cancel_confirm', post_id=post.id) }}" class="btn btn-cancel">⚠️ この応募を取り消す</a>
+                {% if current_user == post.author or current_user.is_admin %}
+                <a href="{{ url_for('edit_post', post_id=post.id) }}" class="btn-action btn-edit">✏️ 編集する</a>
+                <a href="{{ url_for('delete_post', post_id=post.id) }}" class="btn-action btn-delete" onclick="return confirm('本当に削除しますか？');">🗑️ 削除する</a>
                 {% elif not post.helper %}
-                <a href="{{ url_for('apply_post', post_id=post.id) }}" class="btn btn-apply">🙋 このお手伝いを手伝う！</a>
+                <a href="{{ url_for('apply_post', post_id=post.id) }}" class="btn-action btn-apply">🤝 助っ人として応募する</a>
                 {% endif %}
-                {% endif %}
-                {% else %}
-                <p style="color: #666;"><a href="{{ url_for('login') }}" style="color: #2e7d32; font-weight: bold;">ログイン</a>すると、このお手伝いに応募できます。</p>
                 {% endif %}
             </div>
         </div>
+
+        <!-- チャットエリア (関係者のみ閲覧・利用可能) -->
+        {% if is_authorized %}
+        <div class="chat-section">
+            <div class="chat-title">
+                <span>💬 お手伝い専用チャット（関係者非公開）</span>
+            </div>
+
+            <div class="chat-logs" id="chatLogs">
+                {% for msg in messages %}
+                {% set role_class = 'role-author' %}
+                {% set badge_html = '<span class="badge-author">投稿者</span>' %}
+
+                {% if msg.sender == post.helper %}
+                {% set role_class = 'role-helper' %}
+                {% set badge_html = '<span class="badge-helper">助っ人</span>' %}
+                {% elif msg.sender.is_admin and msg.sender != post.author %}
+                {% set role_class = 'role-admin' %}
+                {% set badge_html = '<span class="badge-admin">管理人</span>' %}
+                {% endif %}
+
+                <div class="chat-message {{ role_class }}">
+                    <div class="chat-header">
+                        {{ badge_html|safe }}
+                        <strong>{{ msg.sender.username }}</strong>
+                        <span style="font-size: 11px;">{{ msg.created_at.strftime('%H:%M') }}</span>
+                    </div>
+                    <div class="chat-bubble-container">
+                        <div class="chat-bubble">
+                            {{ msg.content }}
+                        </div>
+
+                        {% if current_user.is_authenticated and msg.sender == current_user %}
+                        <form action="{{ url_for('delete_message', message_id=msg.id) }}" method="POST" style="margin: 0;" onsubmit="return confirm('このメッセージを取り消しますか？');">
+                            <button type="submit" class="btn-delete-msg">取り消し</button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+                {% else %}
+                <p style="text-align: center; color: #999; font-size: 14px; margin: 20px 0;">まだメッセージはありません。チャットで相談を始めましょう！</p>
+                {% endfor %}
+            </div>
+
+            <form action="{{ url_for('send_message', post_id=post.id) }}" method="POST" class="chat-form">
+                <input type="text" name="message_text" class="chat-input" placeholder="メッセージを入力..." required autocomplete="off">
+                <button type="submit" class="btn-send">送信</button>
+            </form>
+        </div>
+        {% endif %}
     </div>
+
+    <script>
+        const chatLogs = document.getElementById('chatLogs');
+        if (chatLogs) {
+            chatLogs.scrollTop = chatLogs.scrollHeight;
+        }
+
+        // 3秒ごとのリアルタイム自動更新
+        {% if is_authorized %}
+        setInterval(function () {
+            fetch(window.location.href)
+                .then(response => response.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const newChatLogs = doc.getElementById('chatLogs');
+                    if (newChatLogs && chatLogs) {
+                        if (chatLogs.innerHTML !== newChatLogs.innerHTML) {
+                            chatLogs.innerHTML = newChatLogs.innerHTML;
+                            chatLogs.scrollTop = chatLogs.scrollHeight;
+                        }
+                    }
+                })
+                .catch(err => console.log('更新待機中...'));
+        }, 3000);
+        {% endif %}
+    </script>
 </body>
 
 </html>

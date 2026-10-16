@@ -6,12 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>お手伝い案件の投稿 - おらほの助っ人けっぱれーと</title>
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Meiryo", sans-serif;
-            background: linear-gradient(135deg, #fef9e7 0%, #edf7ed 100%);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(110deg, #fceecb 0%, #eef7e6 100%);
             background-attachment: fixed;
             margin: 0;
-            padding: 20px;
+            padding: 25px 15px;
             color: #333;
         }
 
@@ -43,20 +47,50 @@
             font-size: 14px;
         }
 
+        .required-badge {
+            display: inline-block;
+            background-color: #d32f2f;
+            color: white;
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            vertical-align: middle;
+            margin-left: 4px;
+        }
+
+        .optional-badge {
+            display: inline-block;
+            background-color: #9e9e9e;
+            color: white;
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            vertical-align: middle;
+            margin-left: 4px;
+        }
+
         input[type="text"],
+        input[type="datetime-local"],
+        select,
         textarea {
             width: 100%;
             padding: 12px;
             margin-bottom: 20px;
             border: 1px solid #ddd;
             border-radius: 8px;
-            box-sizing: border-box;
             font-size: 15px;
             background-color: #fafafa;
         }
 
-        input[type="file"] {
+        .note-box {
+            background: #fff8e1;
+            border-left: 4px solid #ff8c00;
+            padding: 10px 14px;
+            font-size: 13px;
+            color: #5d4037;
+            border-radius: 0 8px 8px 0;
             margin-bottom: 20px;
+            line-height: 1.5;
         }
 
         .btn-submit {
@@ -70,11 +104,11 @@
             cursor: pointer;
             width: 100%;
             box-shadow: 0 4px 10px rgba(255, 140, 0, 0.3);
-            transition: transform 0.1s;
+            transition: opacity 0.2s;
         }
 
         .btn-submit:hover {
-            transform: translateY(-2px);
+            opacity: 0.9;
         }
     </style>
 </head>
@@ -90,35 +124,49 @@
                 {{ form.hidden_tag() }}
 
                 <div>
-                    {{ form.title.label }}
+                    <label>{{ form.title.label }} <span class="required-badge">必須</span></label>
                     {{ form.title(placeholder="例：庭の草むしりと草刈り機の手配") }}
                 </div>
                 <div>
-                    {{ form.content.label }}
-                    {{ form.content(rows=6, placeholder="具体的な作業内容やお願いしたいことを記入してください") }}
+                    <label>{{ form.content.label }} <span class="required-badge">必須</span></label>
+                    {{ form.content(rows=5, placeholder="具体的な作業内容やお願いしたいことを詳しく記入してください") }}
                 </div>
                 <div>
-                    {{ form.desired_date.label }}
-                    {{ form.desired_date(placeholder="例：10月25日 13:00〜") }}
+                    <label>{{ form.desired_date.label }} <span class="required-badge">必須</span></label>
+                    {{ form.desired_date() }}
                 </div>
                 <div>
-                    {{ form.location.label }}
-                    {{ form.location(placeholder="例：平泉字衣関") }}
+                    <label>{{ form.location.label }} <span class="required-badge">必須</span></label>
+                    {{ form.location() }}
+                </div>
+
+                <div>
+                    <label>{{ form.detail_address.label }} <span class="required-badge">必須</span></label>
+                    <div class="note-box">
+                        🔒 詳細な住所や連絡先は、一般の閲覧者には一切見えません。<strong>「助っ人が決定したあと」</strong>に、投稿者と決定した助っ人だけに公開されます。
+                    </div>
+                    {{ form.detail_address(placeholder="例：平泉字衣関 123-4 / 連絡先: 090-XXXX-XXXX") }}
+                </div>
+
+                <div>
+                    <label>{{ form.contact_method.label }} <span class="required-badge">必須</span></label>
+                    {{ form.contact_method() }}
+                </div>
+
+                <div>
+                    <label>{{ form.reward.label }} <span class="optional-badge">任意</span></label>
+                    {{ form.reward(placeholder="例：採れたて野菜、お茶代程度 など") }}
                 </div>
                 <div>
-                    {{ form.reward.label }}
-                    {{ form.reward(placeholder="例：採れたて野菜 / お礼の品 など") }}
+                    <label>{{ form.recommendation.label }} <span class="optional-badge">任意</span></label>
+                    {{ form.recommendation(placeholder="例：体力に自信のある方、要普通免許 など") }}
                 </div>
                 <div>
-                    {{ form.recommendation.label }}
-                    {{ form.recommendation(placeholder="例：重労働につき体力に自信のある方（任意）") }}
-                </div>
-                <div>
-                    {{ form.image.label }}
+                    <label>{{ form.image.label }} <span class="optional-badge">任意</span></label>
                     {{ form.image() }}
                 </div>
 
-                <div style="margin-top: 10px;">
+                <div style="margin-top: 25px;">
                     <button type="submit" class="btn-submit">この内容で投稿する</button>
                 </div>
             </form>

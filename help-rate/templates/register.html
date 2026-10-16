@@ -1,69 +1,419 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>新規ユーザー登録 - おらほの助っ人けっぱれーと</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(110deg, #fceecb 0%, #eef7e6 100%);
+            background-attachment: fixed;
+            margin: 0;
+            padding: 25px 15px;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #2e7d32;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 15px;
+        }
+
+        .card {
+            background-color: #ffffff;
+            border-radius: 16px;
+            padding: 35px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+        }
+
+        label {
+            font-weight: bold;
+            color: #444;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+
+        .required-badge {
+            display: inline-block;
+            background-color: #d32f2f;
+            color: white;
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            vertical-align: middle;
+            margin-left: 4px;
+        }
+
+        .optional-badge {
+            display: inline-block;
+            background-color: #9e9e9e;
+            color: white;
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            vertical-align: middle;
+            margin-left: 4px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 14px;
+            margin-bottom: 8px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            background-color: #fafafa;
+        }
+
+        .name-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .name-row>div {
+            flex: 1;
+        }
+
+        .name-row input {
+            margin-bottom: 0 !important;
+        }
+
+        .password-wrapper {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .password-wrapper input {
+            margin-bottom: 0 !important;
+            flex: 1;
+        }
+
+        .btn-toggle-pw {
+            background-color: #e0e0e0;
+            border: none;
+            border-radius: 8px;
+            padding: 0 15px;
+            font-weight: bold;
+            color: #333;
+            cursor: pointer;
+            height: 50px;
+            font-size: 14px;
+            white-space: nowrap;
+            transition: background 0.2s;
+        }
+
+        .btn-toggle-pw:hover {
+            background-color: #d0d0d0;
+        }
+
+        .phone-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .phone-group input {
+            text-align: center;
+            margin-bottom: 0 !important;
+        }
+
+        .field-error {
+            color: #d32f2f;
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            margin-top: -4px;
+        }
+
+        .field-container {
+            margin-bottom: 18px;
+        }
+
+        .privacy-box {
+            background: #e8f5e9;
+            border-left: 4px solid #2e7d32;
+            padding: 12px 16px;
+            font-size: 13px;
+            color: #1b5e20;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 22px;
+            line-height: 1.6;
+        }
+
+        .btn-submit {
+            background-color: #ff8c00;
+            color: white;
+            padding: 16px 25px;
+            border: none;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 17px;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: 0 4px 10px rgba(255, 140, 0, 0.3);
+            transition: opacity 0.2s;
+        }
+
+        .btn-submit:hover {
+            opacity: 0.9;
+        }
+
+        .alert {
+            padding: 14px;
+            background-color: #ffebee;
+            color: #c62828;
+            border-radius: 10px;
+            margin-bottom: 22px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            border: 1px solid #ffcdd2;
+        }
+
+        .footer-link {
+            text-align: center;
+            margin-top: 22px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .footer-link a {
+            color: #2e7d32;
+            font-weight: bold;
+            text-decoration: none;
+        }
+    </style>
 </head>
+
 <body>
-    <p><a href="{{ url_for('index') }}" style="text-decoration: none; font-size: 16px;">🏠 ホーム画面に戻る</a></p>
+    <div class="container">
+        <a href="{{ url_for('index') }}" class="back-link">🏠 ホーム画面に戻る</a>
 
-    <h1>新規ユーザー登録</h1>
+        <div class="card">
+            <h2 style="margin-top: 0; color: #2e7d32; text-align: center; margin-bottom: 20px;">📝 新規ユーザー登録</h2>
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <ul>
-          {% for category, message in messages %}
-            <li>{{ message }}</li>
-          {% endfor %}
-        </ul>
-      {% endif %}
-    {% endwith %}
+            <div class="privacy-box">
+                🔒 ご登録いただいた本情報は一般には非公開です。<br>
+                <strong>※本名は非公開です。他の人と被らない「ニックネーム」を設定してください。</strong>
+            </div>
 
-    <form method="POST">
-        {{ form.hidden_tag() }}
-        
-        <p>
-            {{ form.username.label }}<br>
-            {{ form.username(size=30) }}
-        </p>
-        <p>
-            {{ form.email.label }}<br>
-            {{ form.email(size=30) }}
-        </p>
-        <p>
-            {{ form.password.label }}<br>
-            {{ form.password(size=30) }}
-        </p>
-        <p>
-            {{ form.confirm_password.label }}<br>
-            {{ form.confirm_password(size=30) }}
-        </p>
-        
-        <!-- ボタン選択式（ラジオボタン）の年代 -->
-        <p>
-            <strong>{{ form.age_group.label }}</strong><br>
-            {% for subfield in form.age_group %}
-                <label style="margin-right: 15px; cursor: pointer;">
-                    {{ subfield }} {{ subfield.label.text }}
-                </label>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert">{{ message }}</div>
             {% endfor %}
-        </p>
+            {% endif %}
+            {% endwith %}
 
-        <!-- ボタン選択式（ラジオボタン）の性別 -->
-        <p>
-            <strong>{{ form.gender.label }}</strong><br>
-            {% for subfield in form.gender %}
-                <label style="margin-right: 15px; cursor: pointer;">
-                    {{ subfield }} {{ subfield.label.text }}
-                </label>
-            {% endfor %}
-        </p>
+            <form method="POST" id="registerForm" onsubmit="preparePhoneSubmit()">
+                <div>
+                    {{ form.hidden_tag() }}
+                </div>
 
-        <p style="margin-top: 20px;">
-            {{ form.submit(value="登録する") }}
-        </p>
-    </form>
-    
-    <p><a href="{{ url_for('login') }}">すでにアカウントをお持ちの方はこちら（ログイン）</a></p>
+                <div class="field-container">
+                    <label>{{ form.username.label }} <span class="required-badge">必須</span></label>
+                    {{ form.username(id="usernameField", placeholder="例：平泉太郎 または たろうママ など") }}
+                    <div style="font-size: 12px; color: #666; margin-top: 4px;">※アプリ内で他の方と被らない、あなた専用の表示名です。</div>
+                    {% if form.username.errors %}
+                    <div class="field-error">{% for error in form.username.errors %}{{ error }}{% endfor %}</div>
+                    {% endif %}
+                </div>
+
+                <div class="field-container">
+                    <label>お名前（本名・非公開） <span class="required-badge">必須</span></label>
+                    <div class="name-row">
+                        <div>
+                            {{ form.last_name(placeholder="姓（例：山田）") }}
+                        </div>
+                        <div>
+                            {{ form.first_name(placeholder="名（例：太郎）") }}
+                        </div>
+                    </div>
+                    {% if form.last_name.errors or form.first_name.errors %}
+                    <div class="field-error">姓または名が入力されていません。</div>
+                    {% endif %}
+                </div>
+
+                <div class="field-container">
+                    <label>お名前 ふりがな <span class="required-badge">必須</span></label>
+                    <div class="name-row">
+                        <div>
+                            {{ form.last_name_kana(placeholder="せい（例：やまだ）") }}
+                        </div>
+                        <div>
+                            {{ form.first_name_kana(placeholder="めい（例：たろう）") }}
+                        </div>
+                    </div>
+                    {% if form.last_name_kana.errors or form.first_name_kana.errors %}
+                    <div class="field-error">ふりがなが入力されていません。</div>
+                    {% endif %}
+                </div>
+
+                <div class="field-container">
+                    <label>{{ form.email.label }} <span class="optional-badge">任意</span></label>
+                    {{ form.email(placeholder="例：example@email.com（お持ちでない場合は空欄でOK）") }}
+                    {% if form.email.errors %}
+                    <div class="field-error">{% for error in form.email.errors %}{{ error }}{% endfor %}</div>
+                    {% endif %}
+                </div>
+
+                <div class="field-container">
+                    <label>
+                        {{ form.password.label }} <span class="required-badge">必須</span>
+                        <span style="font-size: 12px; font-weight: normal; color: #666; margin-left: 6px;">（半角英数記号のみ）</span>
+                    </label>
+                    <div class="password-wrapper">
+                        {{ form.password(id="passwordField", placeholder="パスワードを入力") }}
+                        <button type="button" class="btn-toggle-pw" id="togglePwBtn" onclick="togglePassword()">👁️ 表示</button>
+                    </div>
+                    {% if form.password.errors %}
+                    <div class="field-error">{% for error in form.password.errors %}{{ error }}{% endfor %}</div>
+                    {% endif %}
+                </div>
+
+                <div class="field-container">
+                    <label>電話番号 <span class="required-badge">必須</span></label>
+                    <div class="phone-group">
+                        <input type="text" id="p1" maxlength="4" placeholder="090/0191" style="flex: 1.2;" inputmode="numeric">
+                        <span style="font-weight: bold; color: #666;">-</span>
+                        <input type="text" id="p2" maxlength="4" placeholder="1234" style="flex: 1;" inputmode="numeric">
+                        <span style="font-weight: bold; color: #666;">-</span>
+                        <input type="text" id="p3" maxlength="4" placeholder="5678" style="flex: 1;" inputmode="numeric">
+                    </div>
+                    <input type="hidden" name="phone" id="phone" value="{{ form.phone.data or '' }}">
+
+                    <div style="font-size: 12px; color: #666; margin-top: 4px; margin-bottom: 6px;">
+                        ※携帯電話や固定電話のどちらでもOKです。（ハイフンは自動で繋がります）
+                    </div>
+
+                    {% if form.phone.errors %}
+                    <div class="field-error">{% for error in form.phone.errors %}{{ error }}{% endfor %}</div>
+                    {% endif %}
+                </div>
+
+                <div class="field-container">
+                    <label>{{ form.gender.label }} <span class="required-badge">必須</span></label>
+                    {{ form.gender() }}
+                    {% if form.gender.errors %}
+                    <div class="field-error">{% for error in form.gender.errors %}{{ error }}{% endfor %}</div>
+                    {% endif %}
+                </div>
+
+                <div class="field-container">
+                    <label>{{ form.age.label }} <span class="optional-badge">任意</span></label>
+                    {{ form.age(placeholder="例：75") }}
+                    {% if form.age.errors %}
+                    <div class="field-error">{% for error in form.age.errors %}{{ error }}{% endfor %}</div>
+                    {% endif %}
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <button type="submit" class="btn-submit">登録する</button>
+                </div>
+            </form>
+
+            <div class="footer-link">
+                すでにアカウントをお持ちですか？ <a href="{{ url_for('login') }}">ログイン</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', function () {
+            const usernameField = document.getElementById('usernameField');
+            if (usernameField) {
+                usernameField.focus();
+            }
+
+            const hiddenPhone = document.getElementById('phone');
+            if (hiddenPhone && hiddenPhone.value) {
+                const parts = hiddenPhone.value.split('-');
+                if (parts.length >= 1) p1.value = parts[0] || '';
+                if (parts.length >= 2) p2.value = parts[1] || '';
+                if (parts.length >= 3) p3.value = parts[2] || '';
+            }
+        });
+
+        function togglePassword() {
+            const pwdField = document.getElementById('passwordField');
+            const toggleBtn = document.getElementById('togglePwBtn');
+            if (pwdField.type === 'password') {
+                pwdField.type = 'text';
+                toggleBtn.textContent = '🔒 隠す';
+            } else {
+                pwdField.type = 'password';
+                toggleBtn.textContent = '👁️ 表示';
+            }
+        }
+
+        const p1 = document.getElementById('p1');
+        const p2 = document.getElementById('p2');
+        const p3 = document.getElementById('p3');
+
+        p1.addEventListener('input', function () {
+            this.value = this.value.replace(/[^0-9]/g, '');
+            const val = this.value;
+            const mobilePrefixes = ['090', '080', '070', '060', '050'];
+            if (val.length === 3 && mobilePrefixes.includes(val)) {
+                p2.focus();
+            } else if (val.length >= 4) {
+                p2.focus();
+            }
+        });
+
+        p2.addEventListener('input', function () {
+            this.value = this.value.replace(/[^0-9]/g, '');
+            if (this.value.length >= 4) {
+                p3.focus();
+            }
+        });
+
+        p3.addEventListener('input', function () {
+            this.value = this.value.replace(/[^0-9]/g, '');
+            if (this.value.length > 4) {
+                this.value = this.value.slice(0, 4);
+            }
+        });
+
+        p1.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); p2.focus(); } });
+        p2.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); p3.focus(); } });
+
+        function preparePhoneSubmit() {
+            const val1 = p1.value.trim();
+            const val2 = p2.value.trim();
+            const val3 = p3.value.trim();
+
+            const phoneField = document.getElementById('phone');
+            if (phoneField) {
+                phoneField.value = val1 + '-' + val2 + '-' + val3;
+            }
+        }
+    </script>
 </body>
+
 </html>
