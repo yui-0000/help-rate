@@ -1,70 +1,369 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
-    <title>おらほの助っ人けっぱれーと</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>おらほの助っ人けっぱれーと - 地域密着型お手伝いマッチング掲示板</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+            background: linear-gradient(110deg, #fceecb 0%, #eef7e6 100%);
+            background-attachment: fixed;
+            margin: 0;
+            padding: 25px 15px;
+            color: #333333;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* 中央の大きなメインカード（全体を包むコンテナ） */
+        .main-wrapper {
+            max-width: 980px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        /* ヘッダーエリア */
+        .header {
+            padding: 25px 35px 20px 35px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 1px solid #f2f2f2;
+        }
+
+        .header-title-group h1 {
+            margin: 0;
+            font-size: 26px;
+            font-weight: 800;
+            color: #333333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: -0.5px;
+        }
+
+        .header-title-group h1 span.logo-icon {
+            color: #c09e38;
+            font-size: 28px;
+        }
+
+        .header-title-group p {
+            margin: 6px 0 0 0;
+            font-size: 13px;
+            color: #666666;
+        }
+
+        /* ヘッダー右側のアクション */
+        .header-actions {
+            text-align: right;
+        }
+
+        .user-nav {
+            font-size: 13px;
+            color: #444444;
+            margin-bottom: 12px;
+        }
+
+        .user-nav a {
+            color: #333333;
+            text-decoration: underline;
+            margin-left: 8px;
+        }
+
+        .btn-post-orange {
+            display: inline-block;
+            background-color: #ff8c00;
+            color: #ffffff !important;
+            padding: 10px 22px;
+            border-radius: 20px;
+            text-decoration: none !important;
+            font-size: 13px;
+            font-weight: bold;
+            box-shadow: 0 3px 8px rgba(255, 140, 0, 0.3);
+            transition: opacity 0.2s;
+        }
+
+        .btn-post-orange:hover {
+            opacity: 0.9;
+        }
+
+        /* メインコンテンツエリア（薄ベージュ内背景） */
+        .content-area {
+            background-color: #fcfbfa;
+            padding: 25px 35px 40px 35px;
+        }
+
+        .section-heading {
+            font-size: 20px;
+            font-weight: bold;
+            color: #222222;
+            margin: 0 0 20px 0;
+        }
+
+        /* 3列グリッドレイアウト */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        @media (max-width: 860px) {
+            .card-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 580px) {
+            .card-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .header-actions {
+                text-align: left;
+            }
+        }
+
+        /* 個別カード */
+        .card {
+            background-color: #ffffff;
+            border-radius: 14px;
+            padding: 18px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
+            border: 1px solid #eeeeee;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 200px;
+        }
+
+        /* バッジ */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .badge-green {
+            background-color: #2e7d32;
+            color: #ffffff;
+        }
+
+        .badge-orange {
+            background-color: #ff8c00;
+            color: #ffffff;
+        }
+
+        /* カードタイトル・情報 */
+        .card-title {
+            margin: 10px 0 8px 0;
+            font-size: 16px;
+            font-weight: bold;
+            line-height: 1.35;
+            color: #111111;
+        }
+
+        .card-title a {
+            color: #111111;
+            text-decoration: none;
+        }
+
+        .card-meta {
+            font-size: 12px;
+            color: #555555;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .card-desc {
+            font-size: 12px;
+            color: #666666;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* カードフッター */
+        .card-footer {
+            text-align: right;
+            margin-top: 12px;
+            padding-top: 8px;
+        }
+
+        .card-footer a {
+            color: #2e7d32;
+            font-weight: bold;
+            font-size: 12px;
+            text-decoration: none;
+        }
+
+        /* 右下の平泉イラストバッジ */
+        .hiraizumi-map-badge {
+            position: fixed;
+            bottom: 20px;
+            right: 25px;
+            background: #ffffff;
+            border-radius: 10px;
+            padding: 6px 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid #e2e2e2;
+            z-index: 999;
+        }
+
+        .map-icon-box {
+            width: 38px;
+            height: 38px;
+            background: #a3c995;
+            border-radius: 6px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .map-pin {
+            color: #d32f2f;
+            font-size: 16px;
+        }
+
+        .sakura-icon {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            font-size: 16px;
+        }
+
+        .map-text {
+            font-size: 12px;
+            font-weight: bold;
+            color: #333333;
+        }
+
+        .alert-bar {
+            padding: 10px 15px;
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            text-align: center;
+        }
+    </style>
 </head>
+
 <body>
-    <!-- タイトルクリックでホームに戻る -->
-    <h1><a href="{{ url_for('index') }}" style="text-decoration: none; color: inherit;">🏠 おらほの助っ人けっぱれーと</a></h1>
-    <p>地域密着型のお手伝いマッチングアプリへようこそ！</p>
 
-    <!-- フラッシュメッセージ -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <ul>
-          {% for category, message in messages %}
-            <li>{{ message }}</li>
-          {% endfor %}
-        </ul>
-      {% endif %}
-    {% endwith %}
+    <div class="main-wrapper">
+        <!-- ヘッダー -->
+        <div class="header">
+            <div class="header-title-group">
+                <h1><span class="logo-icon">🌾</span> おらほの助っ人けっぱれーと</h1>
+                <p>平泉の地域密着型お手伝いマッチング掲示板</p>
+            </div>
 
-    <hr>
-    
-    <!-- ログイン状態による表示・案内 -->
-    {% if current_user.is_authenticated %}
-        <p>ようこそ、<strong>{{ current_user.username }}</strong> さん！</p>
-        <p>
-            <a href="{{ url_for('index') }}">🏠 ホームに戻る</a> | 
-            <a href="{{ url_for('create_post') }}">✏️ 新しいお手伝いを投稿する</a> | 
-            <a href="{{ url_for('logout') }}">ログアウトする</a>
-        </p>
-    {% else %}
-        <p>
-            <a href="{{ url_for('index') }}">🏠 ホームに戻る</a> | 
-            <a href="{{ url_for('login') }}">ログイン</a> | 
-            <a href="{{ url_for('register') }}">新規ユーザー登録</a>
-        </p>
-    {% endif %}
+            <div class="header-actions">
+                {% if current_user.is_authenticated %}
+                <div class="user-nav">
+                    ようこそ, <strong>{{ current_user.username }}</strong> さん
+                    <a href="{{ url_for('logout') }}">ログアウト</a>
+                </div>
+                <a href="{{ url_for('create_post') }}" class="btn-post-orange">＋ お手伝いを頼む（新規投稿）</a>
+                {% else %}
+                <div class="user-nav">
+                    <a href="{{ url_for('login') }}" style="margin-left:0;">ログイン</a> |
+                    <a href="{{ url_for('register') }}">新規ユーザー登録</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
 
-    <hr>
+        <!-- メインコンテンツ -->
+        <div class="content-area">
 
-    <h2>お手伝い案件一覧</h2>
-    {% if posts %}
-        <ul>
-            {% for post in posts %}
-                <li style="margin-bottom: 20px; border: 1px solid #ccc; padding: 10px;">
-                    <!-- タイトルをクリックすると詳細ページへ飛ぶ -->
-                    <h3><a href="{{ url_for('post_detail', post_id=post.id) }}" style="text-decoration: none; color: #0066cc;">{{ post.title }}</a></h3>
-                    <p>{{ post.content }}</p>
-                    
-                    <!-- 画像表示部分 -->
-                    {% if post.image_path %}
-                        <p><img src="{{ url_for('uploaded_file', filename=post.image_path) }}" alt="現場写真" width="200"></p>
-                    {% endif %}
-                    
-                    <small>投稿者: {{ post.author.username }} | 投稿日時: {{ post.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
-
-                    <!-- 本人の場合のみ表示される削除ボタン（確認画面へ移動） -->
-                    {% if current_user.is_authenticated and post.author == current_user %}
-                        <a href="{{ url_for('delete_post', post_id=post.id) }}" style="display:inline-block; margin-left: 10px; background-color: #ff4d4d; color: white; text-decoration: none; padding: 3px 8px; border-radius: 4px; font-size: 12px;">🗑️ 削除</a>
-                    {% endif %}
-                </li>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert-bar">{{ message }}</div>
             {% endfor %}
-        </ul>
-    {% else %}
-        <p>現在、投稿されているお手伝い案件はありません。</p>
-    {% endif %}
+            {% endif %}
+            {% endwith %}
+
+            <h2 class="section-heading">助っ人募集一覧</h2>
+
+            {% if posts %}
+            <div class="card-grid">
+                {% for post in posts %}
+                <div class="card">
+                    <div>
+                        <div>
+                            {% if post.helper %}
+                            <span class="badge badge-orange">🤝 助っ人決定</span>
+                            {% else %}
+                            <span class="badge badge-green">募集中</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="card-title">
+                            <a href="{{ url_for('post_detail', post_id=post.id) }}">{{ post.title }}</a>
+                        </div>
+
+                        <div class="card-meta">
+                            📅 実施日時: {{ post.desired_date or '10月25日 13:00〜' }}<br>
+                            📍 場所: {{ post.location or '平泉字衣関' }}
+                        </div>
+
+                        <div class="card-desc">
+                            {{ post.content }}
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <a href="{{ url_for('post_detail', post_id=post.id) }}">詳細を見る ➔</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div style="text-align: center; color: #888888; padding: 50px 0; background: #ffffff; border-radius: 12px;">
+                現在、お手伝いの募集はありません。
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+
+    <!-- 右下の和風マップアイコンアクセント -->
+    <div class="hiraizumi-map-badge">
+        <div class="map-icon-box">
+            <span class="map-pin">📍</span>
+            <span class="sakura-icon">🌸</span>
+        </div>
+        <span class="map-text">Hiraizumi</span>
+    </div>
+
 </body>
+
 </html>

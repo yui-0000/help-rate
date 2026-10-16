@@ -3,63 +3,130 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>案件の編集 - おらほの助っ人けっぱれーと</title>
+    <style>
+        body {
+            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Meiryo", sans-serif;
+            background: linear-gradient(135deg, #fef9e7 0%, #edf7ed 100%);
+            background-attachment: fixed;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #2e7d32;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .card {
+            background-color: #ffffff;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+        }
+
+        label {
+            font-weight: bold;
+            color: #444;
+            display: block;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 15px;
+            background-color: #fafafa;
+        }
+
+        input[type="file"] {
+            margin-bottom: 20px;
+        }
+
+        .btn-submit {
+            background-color: #2e7d32;
+            color: white;
+            padding: 14px 25px;
+            border: none;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: 0 4px 10px rgba(46, 125, 50, 0.3);
+            transition: transform 0.1s;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+        }
+    </style>
 </head>
 
 <body>
-    <p>
-        <a href="{{ url_for('post_detail', post_id=post.id) }}" style="text-decoration: none; font-size: 16px;">⬅️ 詳細画面に戻る</a> |
-        <a href="{{ url_for('index') }}" style="text-decoration: none; font-size: 16px;">🏠 ホーム画面に戻る</a>
-    </p>
+    <div class="container">
+        <p>
+            <a href="{{ url_for('post_detail', post_id=post.id) }}" class="back-link">⬅️ 詳細画面に戻る</a> |
+            <a href="{{ url_for('index') }}" class="back-link">🏠 ホーム画面に戻る</a>
+        </p>
 
-    <h1>案件内容の編集（訂正）</h1>
+        <div class="card">
+            <h2 style="margin-top: 0; color: #2e7d32; text-align: center; margin-bottom: 25px;">✏️ 案件内容の編集</h2>
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    <ul>
-        {% for category, message in messages %}
-        <li>{{ message }}</li>
-        {% endfor %}
-    </ul>
-    {% endif %}
-    {% endwith %}
+            <form method="POST" enctype="multipart/form-data">
+                {{ form.hidden_tag() }}
 
-    <form method="POST" enctype="multipart/form-data">
-        {{ form.hidden_tag() }}
+                <div>
+                    {{ form.title.label }}
+                    {{ form.title() }}
+                </div>
+                <div>
+                    {{ form.content.label }}
+                    {{ form.content(rows=6) }}
+                </div>
+                <div>
+                    {{ form.desired_date.label }}
+                    {{ form.desired_date() }}
+                </div>
+                <div>
+                    {{ form.location.label }}
+                    {{ form.location() }}
+                </div>
+                <div>
+                    {{ form.reward.label }}
+                    {{ form.reward() }}
+                </div>
+                <div>
+                    {{ form.recommendation.label }}
+                    {{ form.recommendation() }}
+                </div>
+                <div>
+                    {{ form.image.label }} <span style="font-size: 12px; color: #888;">（※変更する場合のみ選択）</span>
+                    {{ form.image() }}
+                </div>
 
-        <p>
-            {{ form.title.label }}<br>
-            {{ form.title(size=40) }}
-        </p>
-        <p>
-            {{ form.content.label }}<br>
-            {{ form.content(rows=5, cols=40) }}
-        </p>
-        <p>
-            {{ form.desired_date.label }}<br>
-            {{ form.desired_date(size=40) }}
-        </p>
-        <p>
-            {{ form.location.label }}<br>
-            {{ form.location(size=40) }}
-        </p>
-        <p>
-            {{ form.reward.label }}<br>
-            {{ form.reward(size=40) }}
-        </p>
-        <!-- 追加：推奨条件 -->
-        <p>
-            {{ form.recommendation.label }}<br>
-            {{ form.recommendation(size=50) }}
-        </p>
-        <p>
-            {{ form.image.label }}（※変更する場合のみ選択）<br>
-            {{ form.image() }}
-        </p>
-        <p>
-            {{ form.submit(value="更新する") }}
-        </p>
-    </form>
+                <div style="margin-top: 10px;">
+                    <button type="submit" class="btn-submit">内容を更新する</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </body>
 
 </html>

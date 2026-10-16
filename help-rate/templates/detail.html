@@ -3,94 +3,202 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ post.title }} - おらほの助っ人けっぱれーと</title>
+    <style>
+        body {
+            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Meiryo", sans-serif;
+            background: linear-gradient(135deg, #fef9e7 0%, #edf7ed 100%);
+            background-attachment: fixed;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #2e7d32;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .card {
+            background-color: #ffffff;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th,
+        td {
+            padding: 14px;
+            border-bottom: 1px solid #f0f0f0;
+            text-align: left;
+            font-size: 15px;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            width: 32%;
+            color: #555;
+            font-weight: 600;
+            border-radius: 6px 0 0 6px;
+        }
+
+        .content-box {
+            background: #fafafa;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #eee;
+            white-space: pre-wrap;
+            line-height: 1.7;
+            margin-top: 10px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            font-size: 15px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.1s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-apply {
+            background-color: #ff8c00;
+            color: white;
+        }
+
+        .btn-cancel {
+            background-color: #d32f2f;
+            color: white;
+        }
+
+        .btn-edit {
+            background-color: #2e7d32;
+            color: white;
+            margin-right: 10px;
+        }
+
+        .btn-delete {
+            background-color: #e0e0e0;
+            color: #555;
+        }
+
+        .alert {
+            padding: 14px;
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+    </style>
 </head>
 
 <body>
-    <p><a href="{{ url_for('index') }}" style="text-decoration: none; font-size: 16px;">🏠 ホーム画面に戻る</a></p>
+    <div class="container">
+        <a href="{{ url_for('index') }}" class="back-link">🏠 ホーム画面に戻る</a>
 
-    <!-- フラッシュメッセージ -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    <ul>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
         {% for category, message in messages %}
-        <li>{{ message }}</li>
+        <div class="alert">{{ message }}</div>
         {% endfor %}
-    </ul>
-    {% endif %}
-    {% endwith %}
-
-    <div style="border: 1px solid #ccc; padding: 20px; width: 60%; background-color: #fafafa;">
-        <h2>{{ post.title }}</h2>
-
-        <table style="width: 100%; margin-bottom: 15px; border-collapse: collapse;">
-            <tr>
-                <td style="padding: 8px; font-weight: bold; width: 160px; background-color: #eee; border: 1px solid #ddd;">実施希望日時</td>
-                <td style="padding: 8px; border: 1px solid #ddd;">{{ post.desired_date or '未設定' }}</td>
-            </tr>
-            <tr>
-                <td style="padding: 8px; font-weight: bold; background-color: #eee; border: 1px solid #ddd;">作業場所</td>
-                <td style="padding: 8px; border: 1px solid #ddd;">{{ post.location or '未設定' }}</td>
-            </tr>
-            <tr>
-                <td style="padding: 8px; font-weight: bold; background-color: #eee; border: 1px solid #ddd;">謝礼</td>
-                <td style="padding: 8px; border: 1px solid #ddd;">{{ post.reward or '未設定' }}</td>
-            </tr>
-            <tr>
-                <td style="padding: 8px; font-weight: bold; background-color: #eee; border: 1px solid #ddd;">推奨する助っ人像</td>
-                <td style="padding: 8px; border: 1px solid #ddd;">{{ post.recommendation or '指定なし（どなたでも歓迎）' }}</td>
-            </tr>
-            <tr>
-                <td style="padding: 8px; font-weight: bold; background-color: #eee; border: 1px solid #ddd;">現在の状況</td>
-                <td style="padding: 8px; border: 1px solid #ddd;">
-                    {% if post.helper %}
-                    <span style="color: green; font-weight: bold;">🤝 助っ人決定！（{{ post.helper.username }}さん）</span>
-                    {% if post.helper_message %}
-                    <br><small style="color: #555;">ひと言: 「{{ post.helper_message }}」</small>
-                    {% endif %}
-                    {% else %}
-                    <span style="color: #0066cc;">募集中</span>
-                    {% endif %}
-                </td>
-            </tr>
-        </table>
-
-        <p><strong>お手伝いの内容詳細:</strong><br>
-        <div style="background: white; padding: 10px; border: 1px solid #ddd; white-space: pre-wrap;">{{ post.content }}</div>
-        </p>
-
-        <!-- 大きな画像表示 -->
-        {% if post.image_path %}
-        <p><strong>現場写真:</strong><br>
-            <img src="{{ url_for('uploaded_file', filename=post.image_path) }}" alt="現場写真" width="400">
-        </p>
         {% endif %}
+        {% endwith %}
 
-        <p><small>投稿者: {{ post.author.username }} | 投稿日時: {{ post.created_at.strftime('%Y-%m-%d %H:%M') }}</small></p>
+        <div class="card">
+            <h2 style="margin-top: 0; color: #2c3e50; font-size: 24px;">{{ post.title }}</h2>
 
-        <!-- ログインユーザーに応じたボタン表示 -->
-        {% if current_user.is_authenticated %}
-        {% if post.author == current_user %}
-        <p>
-            <a href="{{ url_for('edit_post', post_id=post.id) }}" style="background-color: #4CAF50; color: white; text-decoration: none; padding: 5px 10px; border-radius: 4px; font-size: 14px; margin-right: 10px;">✏️ この案件を編集する</a>
-            <a href="{{ url_for('delete_post', post_id=post.id) }}" style="background-color: #ff4d4d; color: white; text-decoration: none; padding: 5px 10px; border-radius: 4px; font-size: 14px;">🗑️ この案件を削除する</a>
-        </p>
-        {% else %}
-        {% if post.helper == current_user %}
-        <!-- 自分がすでに応募している場合：取り消し確認画面へのリンク -->
-        <p>
-            <a href="{{ url_for('cancel_confirm', post_id=post.id) }}" style="background-color: #cc0000; color: white; text-decoration: none; padding: 10px 20px; border-radius: 4px; font-size: 16px; font-weight: bold; display: inline-block;">⚠️ この応募を取り消す</a>
-        </p>
-        {% elif not post.helper %}
-        <!-- 募集中：「手伝う！」確認画面へのリンク -->
-        <p>
-            <a href="{{ url_for('apply_post', post_id=post.id) }}" style="background-color: #ff8c00; color: white; text-decoration: none; padding: 10px 20px; font-size: 16px; border-radius: 4px; font-weight: bold; display: inline-block;">🙋 このお手伝いを手伝う！</a>
-        </p>
-        {% endif %}
-        {% endif %}
-        {% else %}
-        <p><a href="{{ url_for('login') }}">ログイン</a>すると、このお手伝いに応募できます。</p>
-        {% endif %}
+            <table>
+                <tr>
+                    <th>実施希望日時</th>
+                    <td>{{ post.desired_date or '未設定' }}</td>
+                </tr>
+                <tr>
+                    <th>作業場所</th>
+                    <td>{{ post.location or '未設定' }}</td>
+                </tr>
+                <tr>
+                    <th>謝礼</th>
+                    <td>{{ post.reward or '未設定' }}</td>
+                </tr>
+                <tr>
+                    <th>推奨する助っ人像</th>
+                    <td>{{ post.recommendation or '指定なし（どなたでも歓迎）' }}</td>
+                </tr>
+                <tr>
+                    <th>現在の状況</th>
+                    <td>
+                        {% if post.helper %}
+                        <span style="color: #2e7d32; font-weight: bold;">🤝 助っ人決定！（{{ post.helper.username }}さん）</span>
+                        {% if post.helper_message %}
+                        <div style="margin-top: 6px; padding: 8px 12px; background: #e8f5e9; border-radius: 6px; font-size: 14px; color: #2e7d32;">
+                            ひ言メッセージ: 「{{ post.helper_message }}」
+                        </div>
+                        {% endif %}
+                        {% else %}
+                        <span style="color: #1976d2; font-weight: bold;">募集中</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            </table>
+
+            <h3 style="color: #444; margin-top: 25px;">お手伝いの内容詳細</h3>
+            <div class="content-box">{{ post.content }}</div>
+
+            {% if post.image_path %}
+            <h3 style="color: #444; margin-top: 25px;">現場写真</h3>
+            <div style="margin-top: 10px;">
+                <img src="{{ url_for('uploaded_file', filename=post.image_path) }}" alt="現場写真" style="max-width: 100%; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            </div>
+            {% endif %}
+
+            <p style="color: #888; font-size: 13px; margin-top: 30px; border-top: 1px solid #f0f0f0; padding-top: 15px;">
+                投稿者: {{ post.author.username }}さん | 投稿日時: {{ post.created_at.strftime('%Y-%m-%d %H:%M') }}
+            </p>
+
+            <div style="margin-top: 25px; text-align: center;">
+                {% if current_user.is_authenticated %}
+                {% if post.author == current_user %}
+                <div style="display: flex; justify-content: center; gap: 10px;">
+                    <a href="{{ url_for('edit_post', post_id=post.id) }}" class="btn btn-edit">✏️ 編集する</a>
+                    <a href="{{ url_for('delete_post', post_id=post.id) }}" class="btn btn-delete">🗑️ 削除する</a>
+                </div>
+                {% else %}
+                {% if post.helper == current_user %}
+                <a href="{{ url_for('cancel_confirm', post_id=post.id) }}" class="btn btn-cancel">⚠️ この応募を取り消す</a>
+                {% elif not post.helper %}
+                <a href="{{ url_for('apply_post', post_id=post.id) }}" class="btn btn-apply">🙋 このお手伝いを手伝う！</a>
+                {% endif %}
+                {% endif %}
+                {% else %}
+                <p style="color: #666;"><a href="{{ url_for('login') }}" style="color: #2e7d32; font-weight: bold;">ログイン</a>すると、このお手伝いに応募できます。</p>
+                {% endif %}
+            </div>
+        </div>
     </div>
 </body>
 
