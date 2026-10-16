@@ -357,5 +357,4 @@ def uploaded_file(filename):
 
 
 if __name__ == "__main__":
-    initialize()
     app.run(port=8000, debug=True)

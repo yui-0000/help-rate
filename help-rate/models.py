@@ -1,8 +1,11 @@
+import os
 from peewee import *
 from flask_login import UserMixin
 import datetime
 
-db = SqliteDatabase("helprate.db")
+# データベースの場所をアプリのフォルダ内に絶対パスで固定します
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+db = SqliteDatabase(os.path.join(BASE_DIR, "helprate.db"))
 
 
 class User(UserMixin, Model):
@@ -57,3 +60,8 @@ def initialize():
     db.connect()
     db.create_tables([User, Post, Message], safe=True)
     db.close()
+
+
+if __name__ == "__main__":
+    db.connect()
+    db.create_tables([User, Post, Message], safe=True)

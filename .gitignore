@@ -6,6 +6,7 @@
 
 # データベース
 *.db
+*.sqlite
 
 # Pythonキャッシュ
 __pycache__/
