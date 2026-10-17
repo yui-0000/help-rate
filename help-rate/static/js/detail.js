@@ -6,12 +6,21 @@ if (chatLogs) {
 // 3秒ごとのリアルタイム自動更新
 let refreshInProgress = false;
 const originalTitle = document.title;
+function chatContentWithoutTokens(logs) {
+    const copy = logs.cloneNode(true);
+    copy.querySelectorAll('input[name="csrf_token"]').forEach(input => input.setAttribute('value', ''));
+    return copy.innerHTML;
+}
 if (chatLogs) {
 setInterval(function () {
     if (refreshInProgress) return;
     refreshInProgress = true;
     fetch(window.location.href, { cache: 'no-store' })
         .then(response => {
+            if (response.status === 404) {
+                window.location.replace('/');
+                throw new Error('この依頼は削除されました');
+            }
             if (!response.ok || response.redirected) throw new Error('ページを取得できません');
             return response.text();
         })
@@ -56,9 +65,19 @@ setInterval(function () {
             const newChatLogs = doc.getElementById('chatLogs');
             if (newChatLogs && chatLogs) {
                 if (chatLogs.innerHTML !== newChatLogs.innerHTML) {
-                    chatLogs.innerHTML = newChatLogs.innerHTML;
-                    chatLogs.scrollTop = chatLogs.scrollHeight;
+                    if (chatContentWithoutTokens(chatLogs) !== chatContentWithoutTokens(newChatLogs)) {
+                        chatLogs.innerHTML = newChatLogs.innerHTML;
+                        chatLogs.scrollTop = chatLogs.scrollHeight;
+                    } else {
+                        const tokens = newChatLogs.querySelectorAll('input[name="csrf_token"]');
+                        chatLogs.querySelectorAll('input[name="csrf_token"]').forEach((input, i) => {
+                            if (tokens[i]) input.value = tokens[i].value;
+                        });
+                    }
                 }
+            } else if (!newChatLogs) {
+                const section = chatLogs.closest('.chat-section');
+                if (section) section.textContent = 'このチャットを閲覧する権限がなくなりました。ホーム画面に戻ってください。';
             }
         })
         .catch(err => console.log('更新待機中...'))

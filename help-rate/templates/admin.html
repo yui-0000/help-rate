@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理者画面 - おらほの助っ人けっぱれーと</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/detail.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+</head>
+<body>
+<main class="container admin-container">
+    <a class="back-link" href="{{ url_for('index') }}">🏠 ホームに戻る</a>
+    <div class="card">
+        <h1>管理者画面</h1>
+        <nav class="admin-nav" aria-label="管理メニュー">
+            <a href="{{ url_for('admin_users') }}">ユーザー情報を見る</a>
+            <a href="{{ url_for('admin_deleted_posts') }}">削除済みの依頼・写真</a>
+            <a href="{{ url_for('admin_deleted_messages') }}">取り消されたチャット</a>
+            <a href="{{ url_for('admin_deleted_photos') }}">差し替え前の写真</a>
+        </nav>
+        <p>安全管理・問い合わせ対応のための管理画面です。削除された一般ユーザーと関連データは90日保管します。管理者・運営用アカウントは削除対象ではありません。</p>
+    </div>
+    {% if mode == 'users' %}
+    <h2>ユーザー一覧</h2>
+    {% for user in rows %}
+    <article class="card">
+        <h3>{{ user.username }}</h3>
+        <p>ID: {{ user.id }} ／ {{ '管理者' if user.is_admin else '一般ユーザー' }}{% if user.deleted_at %} ／ 削除済み（90日保管）{% endif %}</p>
+        <a class="admin-link" href="{{ url_for('admin_user', user_id=user.id) }}">ユーザー情報を見る</a>
+    </article>
+    {% else %}<p class="card">登録ユーザーはいません。</p>{% endfor %}
+    {% elif mode == 'user' %}
+    <article class="card">
+        <h2>{{ user.username }}さんの登録情報</h2>
+        <dl class="user-details">
+            <dt>ユーザーID</dt><dd>{{ user.id }}</dd>
+            <dt>権限</dt><dd>{{ '管理者' if user.is_admin else '一般ユーザー' }}</dd>
+            <dt>氏名</dt><dd>{{ (user.last_name ~ ' ' ~ user.first_name)|trim or '未登録' }}</dd>
+            <dt>ふりがな</dt><dd>{{ (user.last_name_kana ~ ' ' ~ user.first_name_kana)|trim or '未登録' }}</dd>
+            <dt>電話番号</dt><dd>{{ user.phone or '未登録' }}</dd>
+            <dt>メールアドレス</dt><dd>{{ user.email or '未登録' }}</dd>
+            <dt>性別</dt><dd>{{ user.gender or '未登録' }}</dd>
+            <dt>年齢</dt><dd>{{ user.age if user.age is not none else '未登録' }}</dd>
+        </dl>
+        <p>住所・生年月日は、現在のユーザー登録では収集していません。運営用アカウントの氏名・電話番号は不要です。</p>
+        {% if user.deleted_at %}<p>削除日時: {{ user.deleted_at|retention_date }}（日本時間）</p>
+        {% elif not user.is_admin and not user.admin_managed %}<a class="admin-link danger" href="{{ url_for('admin_delete_user', user_id=user.id) }}">アカウント削除の確認へ</a>{% endif %}
+    </article>
+    {% elif mode == 'delete_user' %}
+    <article class="card">
+        <h2>一般ユーザーの削除確認</h2>
+        <p>対象: <strong>{{ user.username }}</strong>（ID={{ user.id }}）</p>
+        <p>削除後はログインできなくなり、本人の依頼・チャットは通常画面から隠れます。応募中の依頼への割り当ても解除されます。登録情報と関連データは管理者だけが90日間確認でき、その後はアプリの起動時・利用時に消去します。</p>
+        <p>この画面から元に戻すことはできません。管理者・運営用アカウントは削除できません。</p>
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            {{ form.username.label }} {{ form.username(autocomplete="off", placeholder="対象のニックネームを入力") }}
+            {% for error in form.username.errors %}<p role="alert">{{ error }}</p>{% endfor %}
+            <button type="submit" class="admin-link danger">この一般ユーザーを削除する</button>
+        </form>
+        <a href="{{ url_for('admin_user', user_id=user.id) }}">削除せずに戻る</a>
+    </article>
+    {% elif mode == 'posts' %}
+    <h2>削除済みの依頼・添付写真（90日以内）</h2>
+    {% for post in rows %}
+    <article class="card">
+        <h3>{{ post.title }}</h3>
+        <p>削除日時: {{ post.deleted_at|retention_date }}（日本時間）／ 投稿者: {{ post.author.username }}</p>
+        <a class="admin-link" href="{{ url_for('admin_deleted_post', post_id=post.id) }}">依頼・チャット・写真を見る</a>
+    </article>
+    {% else %}<p class="card">保管中の削除済み依頼はありません。</p>{% endfor %}
+    {% elif mode == 'post' %}
+    <article class="card">
+        <h2>{{ post.title }}</h2>
+        <p>投稿者: <a href="{{ url_for('admin_user', user_id=post.author_id) }}">{{ post.author.username }}</a></p>
+        <p>削除日時: {{ post.deleted_at|retention_date }}（日本時間）</p>
+        <p>削除した人: {{ post.deleted_by.username if post.deleted_by else '不明' }}</p>
+        <div class="archived-text">{{ post.content }}</div>
+        <p>日時: {{ post.desired_date or '未設定' }} ／ 地域: {{ post.location or '未設定' }}</p>
+        <div class="private-contact">詳細な住所・連絡先: {% include '_private_post_contact.html' %}</div>
+        {% if post.image_path %}<img class="archived-photo" src="{{ url_for('uploaded_file', filename=post.image_path) }}" alt="削除された依頼の添付写真">{% endif %}
+    </article>
+    <h2>この依頼のチャット</h2>
+    {% for msg in rows %}
+    <article class="card"><strong>{{ msg.sender.username }}</strong>（{{ '取り消し済み' if msg.deleted_at else '依頼削除に伴う保管' }}）<div class="archived-text">{{ msg.content }}</div></article>
+    {% else %}<p class="card">保管中のチャットはありません。</p>{% endfor %}
+    {% elif mode == 'photos' %}
+    <h2>差し替え前の写真（90日以内）</h2>
+    {% for photo in rows %}
+    <article class="card">
+        <h3>{{ photo.post.title }}</h3>
+        <p>差し替え日時: {{ photo.deleted_at|retention_date }}（日本時間）</p>
+        <img class="archived-photo" src="{{ url_for('uploaded_file', filename=photo.filename) }}" alt="差し替え前の写真">
+    </article>
+    {% else %}<p class="card">保管中の差し替え前の写真はありません。</p>{% endfor %}
+    {% elif mode == 'messages' %}
+    <h2>取り消されたチャット（90日以内）</h2>
+    {% for msg in rows %}
+    <article class="card">
+        <p>依頼: {{ msg.post.title }} ／ 送信者: {{ msg.sender.username }}</p>
+        <p>削除日時: {{ msg.deleted_at|retention_date }}（日本時間）</p>
+        <div class="archived-text">{{ msg.content }}</div>
+    </article>
+    {% else %}<p class="card">保管中の取り消されたチャットはありません。</p>{% endfor %}
+    {% endif %}
+    {% if page is defined %}
+    <nav class="admin-nav" aria-label="ページ送り">
+        {% if page > 1 %}<a href="{{ url_for(request.endpoint, page=page-1, **request.view_args) }}">前の20件</a>{% endif %}
+        <span>{{ page }}ページ目</span>
+        {% if more %}<a href="{{ url_for(request.endpoint, page=page+1, **request.view_args) }}">次の20件</a>{% endif %}
+    </nav>
+    {% endif %}
+</main>
+</body>
+</html>

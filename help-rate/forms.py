@@ -48,7 +48,7 @@ class PostForm(FlaskForm):
     content = TextAreaField("お手伝いの内容詳細")
     desired_date = StringField("実施希望日時（例: 10月25日 13:00〜）")
     location = StringField("作業場所・エリア（例: 平泉字衣関）")
-    reward = StringField("謝礼（例: 採れたて野菜 / お礼の品 など）")
+    reward = StringField("謝礼・おすそ分け")
     recommendation = StringField("推奨する助っ人像・条件（例: 重労働につき体力に自信のある方。任意）")
     image = FileField(
         "現場写真（任意）",

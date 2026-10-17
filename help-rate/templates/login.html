@@ -31,10 +31,9 @@
         {{ form.hidden_tag() }}
 
         <div class="field-container">
-          <label>ログインID</label>
-          <!-- ★ 山田太郎ではなく、ニックネームや電話番号の例示に変更 -->
-          {{ form.login_id(id="loginIdField", placeholder="例：平泉のタロウ または 090-1234-5678") }}
-          <div class="field-hint">※登録したニックネーム、メール、または電話番号を入力</div>
+          <label for="loginIdField">ログインID</label>
+          {{ form.login_id(id="loginIdField", placeholder="例：タロウ または 090-1234-5678", aria_describedby="login-id-hint") }}
+          <div id="login-id-hint" class="field-hint">※本名の入力は不要です。登録したニックネーム・メールアドレス・電話番号のいずれかを入力してください。</div>
         </div>
 
         <div class="field-container">

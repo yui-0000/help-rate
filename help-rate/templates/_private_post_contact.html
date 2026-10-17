@@ -1,0 +1,6 @@
+{% if post.postal_code %}郵便番号：{{ post.postal_code }}<br>{% endif %}
+住所：{{ post.detail_address or '未設定' }}
+{% if post.contact_phone %}<br>電話番号：{{ post.contact_phone }}{% endif %}
+{% if post.contact_email %}<br>メールアドレス：{{ post.contact_email }}{% endif %}
+
+{% if post.place_notes %}<br>目印・集合場所：{{ post.place_notes }}{% endif %}

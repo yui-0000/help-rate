@@ -13,16 +13,14 @@ window.addEventListener('DOMContentLoaded', function () {
     }
 });
 
-function togglePassword() {
-    const pwdField = document.getElementById('passwordField');
-    const toggleBtn = document.getElementById('togglePwBtn');
-    if (pwdField.type === 'password') {
-        pwdField.type = 'text';
-        toggleBtn.textContent = '🔒 隠す';
-    } else {
-        pwdField.type = 'password';
-        toggleBtn.textContent = '👁️ 表示';
-    }
+function togglePassword(fieldId, buttonId, label) {
+    const pwdField = document.getElementById(fieldId);
+    const toggleBtn = document.getElementById(buttonId);
+    const show = pwdField.type === 'password';
+    pwdField.type = show ? 'text' : 'password';
+    toggleBtn.textContent = show ? '🔒 隠す' : '👁️ 表示';
+    toggleBtn.setAttribute('aria-pressed', String(show));
+    toggleBtn.setAttribute('aria-label', label + (show ? 'を隠す' : 'を表示'));
 }
 
 const p1 = document.getElementById('p1');
@@ -69,4 +67,9 @@ function preparePhoneSubmit() {
 }
 
 document.getElementById('registerForm').addEventListener('submit', preparePhoneSubmit);
-document.getElementById('togglePwBtn').addEventListener('click', togglePassword);
+document.getElementById('togglePwBtn').addEventListener('click', function () {
+    togglePassword('passwordField', 'togglePwBtn', 'パスワード');
+});
+document.getElementById('toggleConfirmPwBtn').addEventListener('click', function () {
+    togglePassword('confirmPasswordField', 'toggleConfirmPwBtn', '確認用パスワード');
+});

@@ -11,6 +11,11 @@
                             <span class="badge status-badge">{{ {'open': '🌱 募集中', 'discussing': '💬 相談中', 'active': '🤝 依頼中', 'completed': '✓ 終了済み'}[state] }}</span>
                         </div>
 
+                        {% if current_user.is_authenticated and post.author_id == current_user.id %}
+                        <div class="ownership-badge">自分の投稿</div>
+                        {% else %}
+                        <div class="other-post-label">投稿者：{{ post.author.username }}</div>
+                        {% endif %}
                         <div class="card-title">
                             <a href="{{ url_for('post_detail', post_id=post.id) }}">{{ post.title }}</a>
                         </div>
@@ -34,7 +39,11 @@
             {% else %}
             <div class="empty-posts">
                 {% if selected_status is defined and selected_status != 'all' %}
-                この状態の依頼はまだありません。「すべて」から他の依頼も確認できます。
+                この状態の依頼はまだありません。状態の「すべて」から他の依頼も確認できます。
+                {% elif selected_owner|default('all') == 'mine' %}
+                自分が投稿した依頼はまだありません。
+                {% elif selected_owner|default('all') == 'others' %}
+                ほかの方の依頼はまだありません。
                 {% else %}
                 現在、お手伝いの募集はありません。
                 {% endif %}

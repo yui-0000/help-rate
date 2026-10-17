@@ -18,16 +18,18 @@ def scenario(tmp_path, monkeypatch):
     monkeypatch.setitem(application.app.config, "WTF_CSRF_ENABLED", True)
     monkeypatch.setitem(application.app.config, "LOGIN_DISABLED", False)
     monkeypatch.setitem(application.app.config, "_DATABASE_INITIALIZED", False)
-    with database.bind_ctx([models.User, models.Post, models.Message]):
+    with database.bind_ctx([models.User, models.Post, models.Message, models.ArchivedPhoto]):
         models.initialize()
         users = [models.User.create(
             username=f"user{i}", last_name="姓", first_name="名",
             last_name_kana="せい", first_name_kana="めい", password="unused",
-            phone="090-1234-5678", is_admin=(i == 3),
+            phone="090-1234-5678", is_admin=(i == 3), admin_managed=(i == 3),
         ) for i in range(4)]
         post = models.Post.create(
             title="依頼", content="草刈り", author=users[0], helper=users[1],
             detail_address="非公開の住所123-4 / 090-1111-2222",
+            contact_phone="080-9876-5432", contact_email="private-contact@example.com",
+            postal_code="0294102", place_notes="非公開の目印：南側の倉庫前",
         )
         client = application.app.test_client()
 
@@ -58,6 +60,10 @@ def test_contact_visibility(scenario, viewer, shared, visible):
     assert response.status_code == 200
     html = response.get_data(as_text=True)
     assert (post.detail_address in html) == visible
+    assert (post.contact_phone in html) == visible
+    assert (post.contact_email in html) == visible
+    assert (post.postal_code in html) == visible
+    assert (post.place_notes in html) == visible
     assert ('id="chatLogs"' in html) == (viewer in (0, 1, 3))
     assert ("/share-contact" in html) == (viewer == 0 and not shared)
     assert ('class="confirmation-heading"' in html) == (viewer == 1 and shared)

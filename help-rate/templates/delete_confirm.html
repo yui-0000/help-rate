@@ -10,7 +10,7 @@
     <p><a href="{{ url_for('index') }}" class="back-link">🏠 ホーム画面に戻る</a></p>
 
     <h1>削除の確認</h1>
-    <p>本当に以下の案件を削除してもよろしいですか？この操作は取り消せません。</p>
+    <p>この依頼を削除すると、通常の画面から依頼・チャット・写真が非表示になります。トラブル対応のため管理者だけが90日間確認でき、その後はアプリの起動時・利用時に完全削除されます。</p>
 
     <div class="post-summary">
         <h3>{{ post.title }}</h3>
@@ -23,6 +23,7 @@
 
     <!-- 削除を実行するボタン -->
     <form action="{{ url_for('delete_post', post_id=post.id) }}" method="POST" class="delete-form">
+        {{ form.hidden_tag() }}
         <button type="submit" class="confirm-button">はい、削除します</button>
     </form>
 

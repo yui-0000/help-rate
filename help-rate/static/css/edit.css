@@ -36,6 +36,10 @@ label {
 }
 
 input[type="text"],
+input[type="tel"],
+input[type="email"],
+input[type="date"],
+select,
 textarea {
     width: 100%;
     padding: 12px;
@@ -100,3 +104,22 @@ body .submit-row {
 .field-error p {
     margin: 0 0 20px;
 }
+
+.retention-notice { font-size: 12px; color: #555; line-height: 1.7; margin: 16px 0; }
+
+.schedule-fields { border: 1px solid #ddd; border-radius: 8px; padding: 16px; margin: 0 0 20px; min-width: 0; }
+.schedule-fields legend { font-weight: bold; color: #444; }
+.schedule-fields .field-help { margin-top: 0; }
+.schedule-fields input, .schedule-fields select { margin-bottom: 8px; box-sizing: border-box; }
+.schedule-clock { display: flex; gap: 16px; flex-wrap: wrap; }
+.schedule-clock > div { flex: 1 1 130px; min-width: 0; }
+.schedule-fields [hidden] { display: none; }
+
+.post-contact-fields { border: 1px solid #ddd; border-radius: 8px; padding: 16px; margin: 0 0 20px; min-width: 0; }
+.post-contact-fields legend { font-weight: bold; color: #444; }
+
+.postal-search-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start; }
+.postal-search-row input { flex: 1 1 160px; width: auto; min-width: 0; }
+.postal-button { border: 1px solid #2e7d32; border-radius: 8px; background: #2e7d32; color: #fff; padding: 12px; font-size: 15px; cursor: pointer; margin-bottom: 12px; }
+.postal-button:disabled { opacity: .6; cursor: wait; }
+[data-postal-address] [hidden] { display: none; }

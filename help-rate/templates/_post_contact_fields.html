@@ -1,0 +1,38 @@
+<div data-postal-address data-search-url="{{ url_for('postal_address_search') }}">
+    <div class="note-box field-help">🔒 住所・電話番号・メールアドレスは、応募しただけでは公開されません。チャットで相談した後、依頼者が承諾して公開操作をした時点で、決定した助っ人にだけ公開されます。公開済みの依頼では変更後の内容も同じ相手に表示されます。</div>
+    {{ form.postal_code.label }}
+    <div class="postal-search-row">
+        {{ form.postal_code(placeholder="例：029-4102", inputmode="numeric", maxlength=8, autocomplete="postal-code", aria_describedby="postal-help postal-status postal-errors") }}
+        <button type="button" class="postal-button" data-postal-search hidden>郵便番号から住所を検索</button>
+    </div>
+    <p id="postal-help" class="field-help">来てほしい場所の郵便番号で検索できます（ハイフンあり・なし両方可）。不明な場合は、下の住所を直接入力してください。</p>
+    <div id="postal-errors" class="field-error" role="alert">{% for error in form.postal_code.errors %}<p>{{ error }}</p>{% endfor %}</div>
+    <p id="postal-status" class="field-help" role="status" aria-live="polite"></p>
+    <div data-postal-results hidden>
+        <label for="postal-candidates">該当する住所を選択</label>
+        <select id="postal-candidates" data-postal-candidates></select>
+        <button type="button" class="postal-button" data-postal-apply>選択した住所を入力する</button>
+    </div>
+    <noscript><p class="field-help">住所検索にはJavaScriptが必要です。下の住所欄へ直接入力できます。</p></noscript>
+    {{ form.detail_address.label }} <span class="required-badge">必須</span>
+    {{ form.detail_address(placeholder="例：岩手県西磐井郡平泉町平泉字衣関123-4", minlength=10, maxlength=500, autocomplete="street-address", aria_describedby="detail-address-help detail-address-errors") }}
+    <p id="detail-address-help" class="field-help">実際に来てほしい場所の住所を、市町村・地区名・番地まで10〜500文字で入力してください。建物名・部屋番号がある場合は併記し、番地がない場合は目印も記入してください。</p>
+    <div id="detail-address-errors" class="field-error" role="alert">{% for error in form.detail_address.errors %}<p>{{ error }}</p>{% endfor %}</div>
+    {{ form.place_notes.label }}
+    {{ form.place_notes(rows=3, maxlength=500, placeholder="例：畑の南側の入口で集合。赤い倉庫が目印です。", aria_describedby="place-notes-help place-notes-errors") }}
+    <p id="place-notes-help" class="field-help">畑や空き地など、住所だけでは分かりにくい場合の目印・集合場所を記入してください。住所と同じ公開範囲で扱います。</p>
+    <div id="place-notes-errors" class="field-error" role="alert">{% for error in form.place_notes.errors %}<p>{{ error }}</p>{% endfor %}</div>
+</div>
+<fieldset class="post-contact-fields">
+    <legend>連絡先（電話番号かメールアドレスのどちらか必須）</legend>
+    <p id="contact-help" class="field-help">連絡希望方法がChatの場合も、電話番号かメールアドレスを必ず入力してください。両方の入力もできます。</p>
+    {{ form.contact_phone.label }}
+    {{ form.contact_phone(type="tel", inputmode="tel", placeholder="携帯：090-1234-5678 ／ 固定：03-1234-5678", maxlength=13, autocomplete="tel", aria_describedby="contact-help contact-phone-help contact-phone-errors contact-phone-feedback") }}
+    <p id="contact-phone-help" class="field-help">0から始まる10〜11桁の電話番号を入力してください。ハイフンは省略できます。</p>
+    <p id="contact-phone-feedback" class="field-error" role="alert" data-phone-feedback></p>
+    <div id="contact-phone-errors" class="field-error" role="alert">{% for error in form.contact_phone.errors %}<p>{{ error }}</p>{% endfor %}</div>
+    {{ form.contact_email.label }}
+    {{ form.contact_email(type="email", placeholder="例：taro@example.com", maxlength=254, autocomplete="email", aria_describedby="contact-help contact-email-help contact-email-errors") }}
+    <p id="contact-email-help" class="field-help">@の後ろも最後まで入力してください（例：taro@example.com）。</p>
+    <div id="contact-email-errors" class="field-error" role="alert">{% for error in form.contact_email.errors %}<p>{{ error }}</p>{% endfor %}</div>
+</fieldset>

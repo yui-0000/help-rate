@@ -115,3 +115,82 @@ def test_unknown_status_returns_all_posts(scenario):
     html = client.get("/?status=unknown").get_data(as_text=True)
     assert f'data-post-id="{post.id}"' in html
     assert 'class="badge status-all status-badge status-filter" aria-current="page"' in html
+
+
+@pytest.mark.parametrize("owner", ["all", "mine", "others"])
+@pytest.mark.parametrize("status", ["all", "open", "discussing", "active", "completed"])
+def test_owner_and_status_filters_work_together_in_home_and_refresh(scenario, owner, status):
+    client, post, users, login, _ = scenario
+    post.delete_instance()
+    entries = []
+    for author in users[:2]:
+        for state in ("open", "discussing", "active", "completed"):
+            item = models.Post.create(title=f"{author.username}-{state}", content="内容", author=author,
+                helper=users[2] if state != "open" else None,
+                contact_shared=state in ("active", "completed"), is_completed=state == "completed")
+            entries.append((author.id, state, item.id))
+    login(0)
+    expected = {item_id for author_id, state, item_id in entries
+        if (owner == "all" or (owner == "mine" and author_id == users[0].id) or (owner == "others" and author_id != users[0].id))
+        and (status == "all" or status == state)}
+    for base in ("/", "/posts/list"):
+        html = client.get(f"{base}?owner={owner}&status={status}").get_data(as_text=True)
+        actual = {int(value) for value in re.findall(r'data-post-id="(\d+)"', html)}
+        assert actual == expected
+        assert ("自分の投稿" in html) == (owner != "others")
+    html = client.get(f"/?owner={owner}&status={status}").get_data(as_text=True)
+    refresh = re.search(r'data-refresh-url="([^"]+)"', html)[1].replace("&amp;", "&")
+    from urllib.parse import urlparse, parse_qs
+    args = parse_qs(urlparse(refresh).query)
+    assert args.get("owner", ["all"])[0] == owner
+    assert args.get("status", ["all"])[0] == status
+    assert 'class="ownership-tab" aria-current="page"' in html
+
+
+def test_owner_filter_uses_current_login_and_hides_deleted_posts(scenario):
+    client, post, users, login, _ = scenario
+    other = models.Post.create(title="別の方の依頼", content="内容", author=users[1])
+    login(0)
+    html = client.get("/posts/list?owner=mine").get_data(as_text=True)
+    assert f'data-post-id="{post.id}"' in html and f'data-post-id="{other.id}"' not in html
+    login(1)
+    html = client.get("/posts/list?owner=mine").get_data(as_text=True)
+    assert f'data-post-id="{other.id}"' in html and f'data-post-id="{post.id}"' not in html
+    other.deleted_at = datetime.now()
+    other.save()
+    assert "自分が投稿した依頼はまだありません" in client.get("/posts/list?owner=mine").get_data(as_text=True)
+    login(None)
+    html = client.get("/?owner=mine").get_data(as_text=True)
+    assert f'data-post-id="{post.id}"' in html
+    assert 'aria-label="投稿者で依頼を絞り込む"' not in html
+    assert 'class="ownership-badge"' not in html
+
+
+def test_unknown_owner_defaults_to_all_and_completed_stays_last(scenario):
+    client, post, users, login, _ = scenario
+    login(0)
+    done = models.Post.create(title="終了した自分の依頼", content="内容", author=users[0], is_completed=True,
+        created_at=datetime.now() + timedelta(days=1))
+    for owner in ("mine", "invalid"):
+        html = client.get(f"/posts/list?owner={owner}").get_data(as_text=True)
+        assert html.index(f'data-post-id="{post.id}"') < html.index(f'data-post-id="{done.id}"')
+
+
+@pytest.mark.parametrize("viewer", [None, 1])
+def test_other_posts_show_nickname_without_private_user_information(scenario, viewer):
+    client, post, users, login, _ = scenario
+    users[0].username = "ご近所のタロウ"
+    users[0].save()
+    login(viewer)
+    for url in ("/", "/posts/list"):
+        html = client.get(url).get_data(as_text=True)
+        assert "投稿者：ご近所のタロウ" in html
+        assert "ほかの方の投稿</div>" not in html
+        assert users[0].phone not in html
+        assert post.contact_email not in html
+
+
+def test_own_post_keeps_its_marker(scenario):
+    client, _, _, login, _ = scenario
+    login(0)
+    assert '<div class="ownership-badge">自分の投稿</div>' in client.get("/posts/list").get_data(as_text=True)

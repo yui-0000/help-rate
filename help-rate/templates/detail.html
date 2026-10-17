@@ -91,7 +91,7 @@
             {% if current_user.is_authenticated and (current_user == post.author or (current_user == post.helper and post.contact_shared)) %}
             <div class="private-contact">
                 🔒 <strong>【関係者用】詳細な住所・連絡先:</strong><br>
-                {{ post.detail_address or '未設定' }}
+                {% include '_private_post_contact.html' %}
             </div>
             {% else %}
             <div class="contact-notice">
@@ -104,7 +104,7 @@
                 {% if current_user.is_authenticated %}
                 {% if current_user == post.author or current_user.is_admin %}
                 <a href="{{ url_for('edit_post', post_id=post.id) }}" class="btn-action btn-edit">✏️ 編集する</a>
-                <a href="{{ url_for('delete_post', post_id=post.id) }}" class="btn-action btn-delete" data-confirm="本当に削除しますか？">🗑️ 削除する</a>
+                <a href="{{ url_for('delete_post', post_id=post.id) }}" class="btn-action btn-delete">🗑️ 削除する</a>
                 {% elif not post.helper and not post.is_completed %}
                 <a href="{{ url_for('apply_post', post_id=post.id) }}" class="btn-action btn-apply">🤝 助っ人として応募する</a>
                 {% endif %}
@@ -142,7 +142,8 @@
                         <div class="chat-bubble">{{ msg.content }}</div>
 
                         {% if current_user.is_authenticated and msg.sender == current_user %}
-                        <form action="{{ url_for('delete_message', message_id=msg.id) }}" method="POST" data-confirm="このメッセージを取り消しますか？" class="delete-message-form">
+                        <form action="{{ url_for('delete_message', message_id=msg.id) }}" method="POST" data-confirm="このメッセージを取り消しますか？通常画面からは非表示になり、トラブル対応のため管理者が90日間確認できます。" class="delete-message-form">
+                            {{ delete_form.hidden_tag() }}
                             <button type="submit" class="btn-delete-msg">取り消し</button>
                         </form>
                         {% endif %}
@@ -154,6 +155,7 @@
                 {% endif %}
             </div>
 
+            {% include '_retention_notice.html' %}
             <form action="{{ url_for('send_message', post_id=post.id) }}" method="POST" class="chat-form">
                 <input type="text" name="message_text" class="chat-input" placeholder="メッセージを入力..." required autocomplete="off">
                 <button type="submit" class="btn-send">送信</button>

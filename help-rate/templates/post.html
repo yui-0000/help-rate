@@ -16,6 +16,7 @@
 
         <div class="card">
             <h2 class="page-title">➕ お手伝い案件の投稿</h2>
+            {% include '_retention_notice.html' %}
 
             <form method="POST" enctype="multipart/form-data">
                 {{ form.hidden_tag() }}
@@ -28,28 +29,14 @@
                     <label>{{ form.content.label }} <span class="required-badge">必須</span></label>
                     {{ form.content(rows=5, placeholder="具体的な作業内容やお願いしたいことを詳しく記入してください") }}
                 </div>
-                <div>
-                    <label>{{ form.desired_date.label }} <span class="required-badge">必須</span></label>
-                    {{ form.desired_date() }}
-                </div>
+                {% include '_schedule_fields.html' %}
                 <div>
                     <label>{{ form.location.label }} <span class="required-badge">必須</span></label>
                     {{ form.location() }}
                     {% include '_area_map.html' %}
                 </div>
 
-                <div>
-                    <label>{{ form.detail_address.label }} <span class="required-badge">必須</span></label>
-                    <div class="note-box">
-                        🔒 詳細な住所や連絡先は、応募しただけでは相手に公開されません。<strong>チャットで相談した後、依頼者が承諾して公開操作をした時点</strong>で、確定した助っ人にだけ公開されます。
-                    </div>
-                    {{ form.detail_address(placeholder="例：平泉字衣関 123-4 / 連絡先: 090-XXXX-XXXX", minlength=10, maxlength=500, aria_describedby="detail-address-help detail-address-errors") }}
-                    <p id="detail-address-help" class="field-help">住所・連絡先を10〜500文字で具体的に入力してください。</p>
-                    <div id="detail-address-errors" class="field-error" role="alert">
-                        {% for error in form.detail_address.errors %}<p>{{ error }}</p>{% endfor %}
-                    </div>
-                </div>
-
+                {% include '_post_contact_fields.html' %}
                 <div>
                     <label>{{ form.contact_method.label }} <span class="required-badge">必須</span></label>
                     {{ form.contact_method() }}
@@ -57,7 +44,7 @@
 
                 <div>
                     <label>{{ form.reward.label }} <span class="optional-badge">任意</span></label>
-                    {{ form.reward(placeholder="例：採れたて野菜、お茶代程度 など") }}
+                    {% include '_reward_input.html' %}
                 </div>
                 <div>
                     <label>{{ form.recommendation.label }} <span class="optional-badge">任意</span></label>
@@ -66,6 +53,8 @@
                 <div>
                     <label>{{ form.image.label }} <span class="optional-badge">任意</span></label>
                     {{ form.image() }}
+                    <p>写真は1依頼につき1枚、5MB以内です。</p>
+                    {% for error in form.image.errors %}<p class="field-error" role="alert">{{ error }}</p>{% endfor %}
                 </div>
 
                 <div class="submit-row">
@@ -76,6 +65,9 @@
     </div>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous" defer></script>
     <script src="{{ url_for('static', filename='js/area-map.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/schedule.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/postal-address.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/contact-input.js') }}" defer></script>
 </body>
 
 </html>

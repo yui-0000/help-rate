@@ -22,6 +22,10 @@
                 {% if current_user.is_authenticated %}
                 <div class="user-nav">
                     ようこそ, <strong>{{ current_user.username }}</strong> さん
+                    {% if current_user.is_admin %}
+                    <a href="{{ url_for('admin_users') }}" class="admin-button">ユーザー情報を見る</a>
+                    <a href="{{ url_for('admin_deleted_posts') }}" class="admin-button">削除済みデータを見る</a>
+                    {% endif %}
                     <a href="{{ url_for('logout') }}">ログアウト</a>
                 </div>
                 <a href="{{ url_for('create_post') }}" class="btn-post-orange">＋ お手伝いを頼む（新規投稿）</a>
@@ -47,13 +51,23 @@
 
             <h2 class="section-heading">助っ人募集一覧</h2>
 
+            {% set owner_args = {'owner': selected_owner} if selected_owner != 'all' else {} %}
+            {% set status_args = {'status': selected_status} if selected_status != 'all' else {} %}
+            {% if current_user.is_authenticated %}
+            <nav class="ownership-tabs" aria-label="投稿者で依頼を絞り込む">
+                {% for value, label in [('all', 'すべての依頼'), ('mine', '自分の依頼'), ('others', 'ほかの方の依頼')] %}
+                <a href="{{ url_for('index', **status_args) if value == 'all' else url_for('index', owner=value, **status_args) }}" class="ownership-tab"{% if selected_owner == value %} aria-current="page"{% endif %}>{{ label }}</a>
+                {% endfor %}
+            </nav>
+            <p class="ownership-guide">{{ {'all': 'すべての依頼を表示しています。ご自身の投稿には「自分の投稿」の目印が付きます。', 'mine': '自分が投稿した依頼だけを表示しています。', 'others': 'ほかの方が投稿した依頼だけを表示しています。'}[selected_owner] }}</p>
+            {% endif %}
             <nav class="list-guide" aria-label="依頼の状態で絞り込む">
                 {% for value, label in [('all', 'すべて'), ('open', '🌱 募集中'), ('discussing', '💬 相談中'), ('active', '🤝 依頼中'), ('completed', '✓ 終了済み')] %}
-                <a href="{{ url_for('index') if value == 'all' else url_for('index', status=value) }}" class="badge status-{{ value }} status-badge status-filter"{% if (selected_status|default('all')) == value %} aria-current="page"{% endif %}>{{ label }}</a>
+                <a href="{{ url_for('index', **owner_args) if value == 'all' else url_for('index', status=value, **owner_args) }}" class="badge status-{{ value }} status-badge status-filter"{% if (selected_status|default('all')) == value %} aria-current="page"{% endif %}>{{ label }}</a>
                 {% endfor %}
             </nav>
             <p id="posts-update-status" class="posts-update-status" role="status" aria-live="polite">3秒ごとに自動更新します</p>
-            <div id="posts-list" data-refresh-url="{{ url_for('posts_list', status=selected_status) if selected_status is defined and selected_status != 'all' else url_for('posts_list') }}">
+            <div id="posts-list" data-refresh-url="{{ url_for('posts_list', **dict(status_args, **owner_args)) }}">
                 {% include '_posts_list.html' %}
             </div>
 

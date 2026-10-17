@@ -355,3 +355,14 @@ body .empty-posts {
     background: #ffffff;
     border-radius: 12px;
 }
+
+.user-nav a.admin-button { display: inline-block; background: #2e7d32; color: white; padding: 10px 12px; margin: 6px; border-radius: 8px; text-decoration: none; font-weight: bold; }
+
+.ownership-tabs { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+.ownership-tab { padding: 11px 18px; border: 2px solid #ddd; border-radius: 10px; color: #444; background: #fff; text-decoration: none; font-size: 16px; font-weight: bold; }
+.ownership-tab[aria-current="page"] { background: #2e7d32; color: #fff; border-color: #2e7d32; }
+.ownership-tab:hover { border-color: #2e7d32; }
+.ownership-tab:focus-visible { outline: 3px solid #1565c0; outline-offset: 3px; }
+.ownership-guide { font-size: 14px; line-height: 1.6; margin: 0 0 18px; color: #555; }
+.ownership-badge { display: inline-block; background: #eee6f7; color: #563381; border: 1px solid #8c6ab2; border-radius: 6px; font-size: 13px; font-weight: bold; padding: 4px 10px; margin-top: 10px; }
+.other-post-label { color: #555; font-size: 13px; margin-top: 10px; }

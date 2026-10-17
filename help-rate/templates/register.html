@@ -20,6 +20,7 @@
                 <strong>※本名は非公開です。他の人と被らない「ニックネーム」を設定してください。</strong>
             </div>
 
+            {% include '_retention_notice.html' %}
             {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
             {% for category, message in messages %}
@@ -34,8 +35,8 @@
                 </div>
 
                 <div class="field-container">
-                    <label>{{ form.username.label }} <span class="required-badge">必須</span></label>
-                    {{ form.username(id="usernameField", placeholder="例：平泉太郎 または たろうママ など") }}
+                    <label for="usernameField">{{ form.username.label.text }} <span class="required-badge">必須</span></label>
+                    {{ form.username(id="usernameField", placeholder="例：平泉太郎 または たろうママ など", autofocus=true, inputmode="text", autocomplete="nickname") }}
                     <div class="field-hint">※アプリ内で他の方と被らない、あなた専用の表示名です。</div>
                     {% if form.username.errors %}
                     <div class="field-error">{% for error in form.username.errors %}{{ error }}{% endfor %}</div>
@@ -81,17 +82,29 @@
                 </div>
 
                 <div class="field-container">
-                    <label>
-                        {{ form.password.label }} <span class="required-badge">必須</span>
-                        <span class="password-hint">（半角英数記号のみ）</span>
+                    <label for="passwordField">
+                        {{ form.password.label.text }} <span class="required-badge">必須</span>
+                        <span id="password-help" class="password-hint">（6〜20文字。数字・英字の組み合わせは必須ではありません）</span>
                     </label>
                     <div class="password-wrapper">
-                        {{ form.password(id="passwordField", placeholder="パスワードを入力") }}
-                        <button type="button" class="btn-toggle-pw" id="togglePwBtn">👁️ 表示</button>
+                        {{ form.password(id="passwordField", placeholder="6〜20文字で入力", autocomplete="new-password", minlength=6, maxlength=20, aria_describedby="password-help") }}
+                        <button type="button" class="btn-toggle-pw" id="togglePwBtn" aria-controls="passwordField" aria-pressed="false" aria-label="パスワードを表示">👁️ 表示</button>
                     </div>
                     {% if form.password.errors %}
                     <div class="field-error">{% for error in form.password.errors %}{{ error }}{% endfor %}</div>
                     {% endif %}
+                </div>
+
+                <div class="field-container">
+                    <label for="confirmPasswordField">{{ form.confirm_password.label.text }} <span class="required-badge">必須</span></label>
+                    <div class="password-wrapper">
+                        {{ form.confirm_password(id="confirmPasswordField", placeholder="同じパスワードをもう一度入力", autocomplete="new-password", minlength=6, maxlength=20, aria_describedby="confirm-password-help confirm-password-errors") }}
+                        <button type="button" class="btn-toggle-pw" id="toggleConfirmPwBtn" aria-controls="confirmPasswordField" aria-pressed="false" aria-label="確認用パスワードを表示">👁️ 表示</button>
+                    </div>
+                    <div id="confirm-password-help" class="field-hint">確認のため、同じパスワードをもう一度入力してください。</div>
+                    <div id="confirm-password-errors" class="field-error" role="alert">
+                        {% for error in form.confirm_password.errors %}<p>{{ error }}</p>{% endfor %}
+                    </div>
                 </div>
 
                 <div class="field-container">

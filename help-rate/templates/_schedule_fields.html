@@ -1,0 +1,28 @@
+<fieldset class="schedule-fields" data-schedule>
+    <legend>実施日と時間 <span class="required-badge">必須</span></legend>
+    <p class="field-help">日付と時間を別々に選んでください。時間が未定の場合も投稿できます。すべて日本時間です。</p>
+    {% if form.legacy_schedule %}<p class="field-help">以前の入力：{{ form.legacy_schedule }}。実施日と時間を選び直してください。</p>{% endif %}
+    {{ form.desired_day.label }}
+    {{ form.desired_day(aria_describedby="desired-day-help desired-day-errors") }}
+    <p id="desired-day-help" class="field-help">ここは日付です。カレンダーで選ぶか、年・月・日を入力してください。</p>
+    <div id="desired-day-errors" class="field-error" role="alert">{% for error in form.desired_day.errors %}<p>{{ error }}</p>{% endfor %}</div>
+    {{ form.time_mode.label }}
+    {{ form.time_mode() }}
+    {% for error in form.time_mode.errors %}<p class="field-error" role="alert">時間の指定方法を選んでください。</p>{% endfor %}
+    <div data-schedule-clock>
+        <p class="field-help">ここは時刻です。例：昼の12時は「12時」「00分」、午後3時は「15時」「00分」を選びます。</p>
+        <div class="schedule-clock">
+            <div>{{ form.desired_hour.label }}{{ form.desired_hour() }}
+                {% for error in form.desired_hour.errors %}<p class="field-error" role="alert">時を0〜23時から選んでください。</p>{% endfor %}</div>
+            <div>{{ form.desired_minute.label }}{{ form.desired_minute() }}
+                {% for error in form.desired_minute.errors %}<p class="field-error" role="alert">分を00〜59分から選んでください。</p>{% endfor %}</div>
+        </div>
+        <p class="field-help" data-schedule-around>「○時頃」では、おおよその時刻として表示します。例：12時・00分 → 12時頃</p>
+    </div>
+    <div data-schedule-period>
+        {{ form.desired_period.label }}{{ form.desired_period() }}
+        {% for error in form.desired_period.errors %}<p class="field-error" role="alert">時間帯を選んでください。</p>{% endfor %}
+    </div>
+    <p class="field-help" data-schedule-consult>時間はチャットで相談して決めます。今は時刻を入力する必要はありません。</p>
+    <noscript><p class="field-help">「時刻を指定」「○時頃」の場合は時・分を、「時間帯」の場合は時間帯だけを選んでください。</p></noscript>
+</fieldset>

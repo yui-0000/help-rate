@@ -82,3 +82,13 @@ test('selected status is included in every automatic refresh', async () => {
     assert.equal(app.calls, 2);
     assert.equal(app.list.dataset.refreshUrl, '/posts/list?status=discussing');
 });
+
+
+test('owner and status selection stay in the automatic refresh URL', async () => {
+    const app = setup();
+    app.list.dataset.refreshUrl = '/posts/list?status=discussing&owner=mine';
+    await app.refresh();
+    await app.refresh();
+    assert.equal(app.calls, 2);
+    assert.equal(app.list.dataset.refreshUrl, '/posts/list?status=discussing&owner=mine');
+});
